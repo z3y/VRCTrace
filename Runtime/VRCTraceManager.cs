@@ -90,6 +90,7 @@ namespace VRCTrace
 
                 var tris = m.triangles;
                 var verts = m.vertices;
+                var norm = m.normals;
 
                 for (int i = 0; i < tris.Length;)
                 {
@@ -112,8 +113,10 @@ namespace VRCTrace
                     var p = f.transform.TransformPoint(verts[i]);
                     vertices.Add(p);
                     objectIds.Add(objectId);
+
+                    var n = f.transform.TransformVector(norm[i]);
+                    normals.Add(n);
                 }
-                normals.AddRange(m.normals);
 
                 vert_offset += verts.Length;
 

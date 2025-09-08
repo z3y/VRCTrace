@@ -7,6 +7,8 @@ Shader "Unlit/VRCTrace Lightmap"
 
         _LightPosition ("Light Position", Vector) = (0,1,0,0)
         _LightRadius ("Light Position", Float) = 0.1
+
+        [Toggle(_MONOSH)] _MonoSH("Mono SH", Float) = 0
     }
     SubShader
     {
@@ -21,6 +23,8 @@ Shader "Unlit/VRCTrace Lightmap"
 
             #include "UnityCG.cginc"
             #include "VRCTrace.hlsl"
+
+            #pragma shader_feature_local _MONOSH
 
             struct appdata
             {
@@ -59,6 +63,7 @@ Shader "Unlit/VRCTrace Lightmap"
             SamplerState sampler_UdonVRCTraceLightmapPositionBuffer;
             Texture2D<float4> _UdonVRCTraceLightmapNormalBuffer;
             Texture2D<float4> _UdonVRCTraceLightmapCopy;
+            Texture2D<float4> _UdonVRCTraceLightmapL1Copy;
 
             int _UdonVRCTraceSampleCount;
             int _UdonVRCTraceSample;
@@ -67,7 +72,14 @@ Shader "Unlit/VRCTrace Lightmap"
             float3 _LightPosition;
             float _LightRadius;
 
-            float4 frag (v2f i) : SV_Target
+            struct Fragout
+            {
+                float4 color0 : SV_Target0;
+                float4 color1 : SV_Target1;
+            };
+
+
+            Fragout frag (v2f i)
             {
                 float2 uv = i.uv;
 
@@ -78,10 +90,14 @@ Shader "Unlit/VRCTrace Lightmap"
                 [branch]
                 if (positionBuffer.a <= 0)
                 {
-                    return 0;
+                    Fragout Out1;
+                    Out1.color0 = 0;
+                    Out1.color1 = 0;
+                    return Out1;
                 }
 
                 float4 previousRt = _UdonVRCTraceLightmapCopy.SampleLevel(sampler_UdonVRCTraceLightmapPositionBuffer, uv, 0);
+                float4 previousRt1 = _UdonVRCTraceLightmapL1Copy.SampleLevel(sampler_UdonVRCTraceLightmapPositionBuffer, uv, 0);
 
                 float2 xi = Hammersley(_UdonVRCTraceRandomSample, _UdonVRCTraceSampleCount);
                 xi = frac(xi + GetRand(i.vertex.xy));
@@ -96,6 +112,16 @@ Shader "Unlit/VRCTrace Lightmap"
                 float attenuation = 1.0 / length(positionToLight);
 
                 float3 diffuseColor = 1;
+                
+                float3 L0 = 0;
+                float3 L1x = 0;
+                float3 L1y = 0;
+                float3 L1z = 0;
+                
+                // float Y0 = 0.282095;
+                float Y0 = 0.25;
+                // float Y1 = 0.488603;
+                float Y1 = 0.5;
 
                 Ray ray;
                 ray.D = L;
@@ -108,12 +134,22 @@ Shader "Unlit/VRCTrace Lightmap"
                 float cosTheta = max(0.0, dot(N, L));
                 float3 directDiffuse = Li * cosTheta;
 
+                L0 = Li * cosTheta * Y0;
+                L1x = Li * (cosTheta * L.x) * Y1;
+                L1y = Li * (cosTheta * L.y) * Y1;
+                L1z = Li * (cosTheta * L.z) * Y1;
+
+
                 Intersection isect;
                 if (SceneIntersects(ray, isect))
                 {
                     if (isect.t < length(positionToLight))
                     {
                         directDiffuse = 0;
+                        L0 = 0;
+                        L1x = 0;
+                        L1y = 0;
+                        L1z = 0;
                     }
                 }
 
@@ -123,13 +159,17 @@ Shader "Unlit/VRCTrace Lightmap"
                 ray.P = RayOffset(P, ray.D);
 
                 float3 indirectDiffuse = 0;
+                float3 L0_1 = 0;
+                float3 L1x_1 = 0;
+                float3 L1y_1 = 0;
+                float3 L1z_1 = 0;
 
                 if (SceneIntersects(ray, isect))
                 {
                     float3 hitP, hitN;
                     TrianglePointNormal(isect, hitP, hitN);
 
-                    // hitN = TriangleSmoothNormal(isect, hitN);
+                    hitN = TriangleSmoothNormal(isect, hitN);
 
                     positionToLight = lightPosition - hitP;
                     L = normalize(positionToLight);
@@ -138,12 +178,17 @@ Shader "Unlit/VRCTrace Lightmap"
                     ray.D = L;
                     ray.P = RayOffset(hitP, ray.D);
 
-                    diffuseColor = isect.object == 3 ? float3(0,1,0) : diffuseColor;
+                    // diffuseColor = isect.object == 3 ? float3(0,1,0) : diffuseColor;
 
                     Li = attenuation * lightColor * diffuseColor;
-                    cosTheta = max(0.0, dot(hitN, -L));
+                    cosTheta = max(0.0, dot(hitN, L));
 
                     indirectDiffuse = Li * cosTheta;
+
+                    L0_1 = Li * cosTheta * Y0;
+                    L1x_1 = Li * (cosTheta * newDir.x) * Y1;
+                    L1y_1 = Li * (cosTheta * newDir.y) * Y1;
+                    L1z_1 = Li * (cosTheta * newDir.z) * Y1;
 
                     [branch]
                     if (cosTheta > 0)
@@ -151,17 +196,55 @@ Shader "Unlit/VRCTrace Lightmap"
                         if (SceneIntersects(ray, isect)) {
                             if (isect.t < length(positionToLight)) {
                                 indirectDiffuse = 0;
+                                L0_1 = 0;
+                                L1x_1 = 0;
+                                L1y_1 = 0;
+                                L1z_1 = 0;
                             }
                         }
                     }
                 }
+                L0 += L0_1;
+                L1x += L1x_1;
+                L1y += L1y_1;
+                L1z += L1z_1;
 
-                float3 diffuse = directDiffuse + indirectDiffuse;
-                float3 previousDiffuse = previousRt.rgb;
+                L0 *= UNITY_PI;
+                L1x *= 2.0 * UNITY_PI / 3.0;
+                L1y *= 2.0 * UNITY_PI / 3.0;
+                L1z *= 2.0 * UNITY_PI / 3.0;
 
-                float3 accumulated = (previousDiffuse * _UdonVRCTraceSample + diffuse) / (_UdonVRCTraceSample + 1);
+                Fragout Out;
 
-                return float4(accumulated, 1);
+                #ifdef _MONOSH
+
+
+                    float3 previousDiffuse0 = previousRt.rgb;
+                    float3 previousDiffuse1 = previousRt1.rgb;
+
+                    L1x = (L1x / max(L0, 0.001)) * 0.5;
+                    L1y = (L1y / max(L0, 0.001)) * 0.5;
+                    L1z = (L1z / max(L0, 0.001)) * 0.5;
+
+                    float3 monoSHL2 = float3(dot(L1x, 1.0 / 3.0), dot(L1y, 1.0 / 3.0), dot(L1z, 1.0 / 3.0));
+
+                    float3 accumulated0 = (previousDiffuse0 * _UdonVRCTraceSample + L0) / (_UdonVRCTraceSample + 1);
+                    float3 accumulated1 = (previousDiffuse1 * _UdonVRCTraceSample + monoSHL2) / (_UdonVRCTraceSample + 1);
+                    Out.color0 = float4(accumulated0, 1);
+                    Out.color1 = float4(accumulated1, 1);
+
+                #else
+
+                    float3 diffuse = directDiffuse + indirectDiffuse;
+                    float3 previousDiffuse = previousRt.rgb;
+
+                    float3 accumulated = (previousDiffuse * _UdonVRCTraceSample + diffuse) / (_UdonVRCTraceSample + 1);
+
+                    Out.color0 = float4(accumulated, 1);
+
+                #endif
+
+                return Out;
             }
             ENDCG
         }

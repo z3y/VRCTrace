@@ -86,7 +86,21 @@ public class VRCTraceLightmapBaker : UdonSharpBehaviour
         VRCShader.SetGlobalTexture(VRCShader.PropertyToID("_UdonVRCTraceLightmap"), _rtL0);
         VRCShader.SetGlobalTexture(VRCShader.PropertyToID("_UdonVRCTraceLightmapCopy"), _rtL0Copy);
 
-        var buffers = new RenderBuffer[] { _rtL0.colorBuffer };
+        RenderBuffer[] buffers;
+        if (monoSH)
+        {
+            VRCShader.SetGlobalTexture(VRCShader.PropertyToID("_UdonVRCTraceLightmapL1"), _rtL1);
+            VRCShader.SetGlobalTexture(VRCShader.PropertyToID("_UdonVRCTraceLightmapL1Copy"), _rtL1Copy);
+
+            VRCGraphics.Blit(Texture2D.blackTexture, _rtL1);
+            VRCGraphics.Blit(Texture2D.blackTexture, _rtL1Copy);
+
+            buffers = new RenderBuffer[] { _rtL0.colorBuffer, _rtL1.colorBuffer };
+        }
+        else
+        {
+            buffers = new RenderBuffer[] { _rtL0.colorBuffer };
+        }
         computeCam.SetTargetBuffers(buffers, _rtL0.depthBuffer);
         computeCam.enabled = false;
     }
@@ -98,6 +112,11 @@ public class VRCTraceLightmapBaker : UdonSharpBehaviour
         VRCShader.SetGlobalInteger(VRCShader.PropertyToID("_UdonVRCTraceRandomSample"), randSample);
         computeCam.Render();
         VRCGraphics.Blit(_rtL0, _rtL0Copy);
+
+        if (monoSH)
+        {
+            VRCGraphics.Blit(_rtL1, _rtL1Copy);
+        }
 
         _sample++;
     }
