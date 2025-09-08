@@ -1,0 +1,16 @@
+{
+  "name": "com.z3y.vrctrace",
+  "version": "0.0.1",
+  "unity": "2022.3",
+  "displayName": "VRCTrace",
+  "hideInEditor": false,
+  "gitDependencies": {},
+  "vpmDependencies": {},
+  "legacyFolders": {},
+  "legacyFiles": {},
+  "author": {
+    "name": "z3y",
+    "url": "https://github.com/z3y"
+  },
+  "description": "VRCTrace"
+}
