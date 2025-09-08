@@ -54,8 +54,8 @@ namespace VRCTrace
             VRCShader.SetGlobalInteger(VRCShader.PropertyToID("_UdonVRCTraceDataWidth"), 0);
         }
 
+        object _bvh = null;
 #if UNITY_EDITOR && !COMPILER_UDONSHARP
-        BVH _bvh = null;
         private void OnDrawGizmosSelected()
         {
             if (_bvh == null)
@@ -63,7 +63,7 @@ namespace VRCTrace
                 return;
             }
 
-            var nodes = _bvh.GetNodes();
+            var nodes = (_bvh as BVH).GetNodes();
 
             foreach (var node in nodes)
             {
@@ -140,8 +140,8 @@ namespace VRCTrace
 
             _bvh = new BVH(vertices.ToArray(), indices.ToArray(), normals.ToArray(), objectIds.ToArray());
 
-            var bvh_tris = _bvh.GetTriangles();
-            var nodes = _bvh.GetNodes();
+            var bvh_tris = (_bvh as BVH).GetTriangles();
+            var nodes = (_bvh as BVH).GetNodes();
 
 
             int tri_verts_buffer_x = Mathf.NextPowerOfTwo((int)math.ceil(math.sqrt(bvh_tris.Length)));

@@ -233,3 +233,65 @@ bool SceneIntersects(Ray ray, out Intersection intersection)
     
     return hit;
 }
+
+float3 RandomDirectionInHemisphere(float3 normal, float2 rand)
+{
+    // rand.x and rand.y are random numbers in [0,1)
+    float phi = 2.0 * 3.14159265 * rand.x; // random azimuth
+    float cosTheta = sqrt(1.0 - rand.y);   // bias toward normal (cosine-weighted)
+    float sinTheta = sqrt(rand.y);
+
+    // Local direction in tangent space
+    float3 localDir = float3(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
+
+    // Build tangent basis around the normal
+    float3 up = abs(normal.z) < 0.999 ? float3(0,0,1) : float3(1,0,0);
+    float3 tangent   = normalize(cross(up, normal));
+    float3 bitangent = cross(normal, tangent);
+
+    // Transform to world space
+    return tangent * localDir.x + bitangent * localDir.y + normal * localDir.z;
+}
+float2 Hammersley(uint i, uint N)
+{
+    // radical inverse (Van der Corput) in base 2
+    uint bits = i;
+    bits = (bits << 16) | (bits >> 16);
+    bits = ((bits & 0x55555555u) << 1) | ((bits & 0xAAAAAAAAu) >> 1);
+    bits = ((bits & 0x33333333u) << 2) | ((bits & 0xCCCCCCCCu) >> 2);
+    bits = ((bits & 0x0F0F0F0Fu) << 4) | ((bits & 0xF0F0F0F0u) >> 4);
+    bits = ((bits & 0x00FF00FFu) << 8) | ((bits & 0xFF00FF00u) >> 8);
+    float radicalInverse = float(bits) * 2.3283064365386963e-10; // / 2^32
+
+    return float2(float(i) / float(N), radicalInverse);
+}
+
+float3 RandomPointOnSphere(float3 center, float radius, float2 xi)
+{
+    // xi ∈ [0,1]^2 (stratified random sample, e.g. Hammersley)
+    float z = 1.0 - 2.0 * xi.x;
+    float r = sqrt(max(0.0, 1.0 - z*z));
+    float phi = 2.0 * UNITY_PI * xi.y;
+
+    float3 dir = float3(r * cos(phi), r * sin(phi), z);
+    return center + dir * radius;
+}
+
+uint3 HashPcg3d(uint3 v)
+{
+  v = v * 1664525u + 1013904223u;
+  v.x += v.y * v.z;
+  v.y += v.z * v.x;
+  v.z += v.x * v.y;
+  v = v ^ (v >> 16);
+  v.x += v.y * v.z;
+  v.y += v.z * v.x;
+  v.z += v.x * v.y;
+  return v;
+}
+
+float2 GetRand(float2 k)
+{
+    float2 f = HashPcg3d(k.xyy).xy;
+    return f * (1.0f / (float)0xFFFFFFFFu);
+}

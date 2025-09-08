@@ -21,6 +21,7 @@ Shader "Unlit/VRCTrace Camera"
             struct appdata
             {
                 float4 vertex : POSITION;
+                float3 normal : NORMAL;
                 float2 uv : TEXCOORD0;
             };
 
@@ -28,6 +29,7 @@ Shader "Unlit/VRCTrace Camera"
             {
                 float2 uv : TEXCOORD0;
                 float3 positionWS : TEXCOORD1;
+                float3 normalWS : TEXCOORD2;
                 float4 vertex : SV_POSITION;
             };
 
@@ -37,37 +39,47 @@ Shader "Unlit/VRCTrace Camera"
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.uv = v.uv;
                 o.positionWS = mul(unity_ObjectToWorld, v.vertex).xyz;
+                o.normalWS = UnityObjectToWorldNormal(v.normal);
                 return o;
             }
-
-SamplerState sampler_UdonVRCTraceBounds;
 
             float4 frag (v2f i) : SV_Target
             {
                 float3 P = i.positionWS;
+                float3 N = i.normalWS;
+                float2 xi = GetRand(i.vertex.xy * _Time.y);
+
                 float3 lightPosition = float3(0,1,0);
+                float lightRadius = 0.1;
+                lightPosition = RandomPointOnSphere(lightPosition, lightRadius, xi);
+                float3 lightColor = 1;
 
                 float3 positionToLight = lightPosition - P;
                 float3 L = normalize(positionToLight);
+                float attenuation = 1.0 / length(positionToLight);
 
                 Ray ray;
                 ray.D = L;
                 ray.P = RayOffset(P, ray.D);
 
+
+
                 float3 color = 1;
+
+                float3 Li = attenuation * lightColor * 1;
+                float cosTheta = max(0.0, dot(N, L));
+                float3 directDiffuse = Li * cosTheta;
 
                 Intersection isec;
                 if (SceneIntersects(ray, isec))
                 {
                     if (isec.t < length(positionToLight))
                     {
-                        color = 0;
+                        directDiffuse = 0;
                     }
                 }
 
-                // return _UdonVRCTraceBounds.Sample(sampler_UdonVRCTraceBounds, i.uv);
-
-                return float4(color, 1);
+                return float4(directDiffuse, 1);
             }
             ENDCG
         }
