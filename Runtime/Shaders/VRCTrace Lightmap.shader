@@ -168,8 +168,10 @@ Shader "Unlit/VRCTrace Lightmap"
                 {
                     float3 hitP, hitN;
                     TrianglePointNormal(isect, hitP, hitN);
+                    bool isBackFace = dot(ray.D, hitN) > 0.0;
 
                     hitN = TriangleSmoothNormal(isect, hitN);
+
 
                     positionToLight = lightPosition - hitP;
                     L = normalize(positionToLight);
@@ -178,21 +180,23 @@ Shader "Unlit/VRCTrace Lightmap"
                     ray.D = L;
                     ray.P = RayOffset(hitP, ray.D);
 
-                    // diffuseColor = isect.object == 3 ? float3(0,1,0) : diffuseColor;
+                    diffuseColor = isect.object == 3 ? float3(0,1,0) : diffuseColor;
 
                     Li = attenuation * lightColor * diffuseColor;
                     cosTheta = max(0.0, dot(hitN, L));
 
-                    indirectDiffuse = Li * cosTheta;
-
-                    L0_1 = Li * cosTheta * Y0;
-                    L1x_1 = Li * (cosTheta * newDir.x) * Y1;
-                    L1y_1 = Li * (cosTheta * newDir.y) * Y1;
-                    L1z_1 = Li * (cosTheta * newDir.z) * Y1;
 
                     [branch]
-                    if (cosTheta > 0)
+                    if (cosTheta > 0 && !isBackFace)
                     {
+                        
+                        indirectDiffuse = Li * cosTheta;
+
+                        L0_1 = Li * cosTheta * Y0;
+                        L1x_1 = Li * (cosTheta * newDir.x) * Y1;
+                        L1y_1 = Li * (cosTheta * newDir.y) * Y1;
+                        L1z_1 = Li * (cosTheta * newDir.z) * Y1;
+
                         if (SceneIntersects(ray, isect)) {
                             if (isect.t < length(positionToLight)) {
                                 indirectDiffuse = 0;
@@ -227,6 +231,8 @@ Shader "Unlit/VRCTrace Lightmap"
                     L1z = (L1z / max(L0, 0.001)) * 0.5;
 
                     float3 monoSHL2 = float3(dot(L1x, 1.0 / 3.0), dot(L1y, 1.0 / 3.0), dot(L1z, 1.0 / 3.0));
+
+                    monoSHL2 = monoSHL2 * 0.5 + 0.5;
 
                     float3 accumulated0 = (previousDiffuse0 * _UdonVRCTraceSample + L0) / (_UdonVRCTraceSample + 1);
                     float3 accumulated1 = (previousDiffuse1 * _UdonVRCTraceSample + monoSHL2) / (_UdonVRCTraceSample + 1);
