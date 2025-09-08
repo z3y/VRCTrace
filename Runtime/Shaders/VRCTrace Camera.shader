@@ -64,7 +64,7 @@ Shader "Unlit/VRCTrace Camera"
 
                 float3 positionToLight = lightPosition - P;
                 float3 L = normalize(positionToLight);
-                float attenuation = 1.0 / length(positionToLight);
+                float attenuation = 1.0 / dot(positionToLight, positionToLight);
 
                 float3 diffuseColor = _Color;
 
@@ -100,11 +100,13 @@ Shader "Unlit/VRCTrace Camera"
                     float3 hitP, hitN;
                     TrianglePointNormal(isect, hitP, hitN);
 
-                    // hitN = TriangleSmoothNormal(isect);
+                    hitN = TriangleSmoothNormal(isect, hitN);
+
+                    bool isBackFace = dot(ray.D, hitN) > 0.0;
 
                     positionToLight = lightPosition - hitP;
                     L = normalize(positionToLight);
-                    attenuation = 1.0 / length(positionToLight);
+                    attenuation = 1.0 / dot(positionToLight, positionToLight);
 
                     ray.D = L;
                     ray.P = RayOffset(hitP, ray.D);
@@ -112,13 +114,13 @@ Shader "Unlit/VRCTrace Camera"
                     diffuseColor = isect.object == 3 ? float3(0,1,0) : diffuseColor;
 
                     Li = attenuation * lightColor * diffuseColor;
-                    cosTheta = max(0.0, dot(hitN, -L));
+                    cosTheta = max(0.0, dot(hitN, L));
 
-                    indirectDiffuse = Li * cosTheta;
 
                     [branch]
-                    if (cosTheta > 0)
+                    if (cosTheta > 0 && !isBackFace)
                     {
+                        indirectDiffuse = Li * cosTheta;
                         if (SceneIntersects(ray, isect)) {
                             if (isect.t < length(positionToLight)) {
                                 indirectDiffuse = 0;

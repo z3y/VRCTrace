@@ -96,6 +96,8 @@ Shader "Unlit/VRCTrace Lightmap"
                     return Out1;
                 }
 
+                // P.xz -= 0.01;
+
                 float4 previousRt = _UdonVRCTraceLightmapCopy.SampleLevel(sampler_UdonVRCTraceLightmapPositionBuffer, uv, 0);
                 float4 previousRt1 = _UdonVRCTraceLightmapL1Copy.SampleLevel(sampler_UdonVRCTraceLightmapPositionBuffer, uv, 0);
 
@@ -105,11 +107,11 @@ Shader "Unlit/VRCTrace Lightmap"
                 float3 lightPosition = _LightPosition;
                 float lightRadius = _LightRadius;
                 lightPosition = RandomPointOnSphere(lightPosition, lightRadius, xi);
-                float3 lightColor = 1;
+                float3 lightColor = 2;
 
                 float3 positionToLight = lightPosition - P;
                 float3 L = normalize(positionToLight);
-                float attenuation = 1.0 / length(positionToLight);
+                float attenuation = 1.0 / dot(positionToLight, positionToLight);
 
                 float3 diffuseColor = 1;
                 
@@ -172,15 +174,14 @@ Shader "Unlit/VRCTrace Lightmap"
 
                     hitN = TriangleSmoothNormal(isect, hitN);
 
-
                     positionToLight = lightPosition - hitP;
                     L = normalize(positionToLight);
-                    attenuation = 1.0 / length(positionToLight);
+                    attenuation = 1.0 / dot(positionToLight, positionToLight);
 
                     ray.D = L;
                     ray.P = RayOffset(hitP, ray.D);
 
-                    diffuseColor = isect.object == 3 ? float3(0,1,0) : diffuseColor;
+                    diffuseColor = isect.object == 9 ? float3(0,1,0) : diffuseColor;
 
                     Li = attenuation * lightColor * diffuseColor;
                     cosTheta = max(0.0, dot(hitN, L));
@@ -198,7 +199,8 @@ Shader "Unlit/VRCTrace Lightmap"
                         L1z_1 = Li * (cosTheta * newDir.z) * Y1;
 
                         if (SceneIntersects(ray, isect)) {
-                            if (isect.t < length(positionToLight)) {
+                            if (isect.t < length(positionToLight))
+                            {
                                 indirectDiffuse = 0;
                                 L0_1 = 0;
                                 L1x_1 = 0;

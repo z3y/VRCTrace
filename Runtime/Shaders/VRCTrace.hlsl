@@ -48,11 +48,32 @@ int2 BoundsIndex(int index)
     return int2(v, h);
 }
 
+#if 1
+// "A Fast and Robust Method for Avoiding Self-Intersection"
+// Normal points outward for rays exiting the surface, else is flipped.
+float3 RayOffset(float3 p, float3 n)
+{
+    const float origin = 1.0f / 32.0f;
+    const float floatScale = 1.0f / 65536.0f;
+    const float intScale = 256.0f;
 
+    int3 of_i = int3(intScale * n.x, intScale * n.y, intScale * n.z);
+
+    float3 p_i = float3(
+    asfloat(asint(p.x)+((p.x < 0) ? -of_i.x : of_i.x)),
+    asfloat(asint(p.y)+((p.y < 0) ? -of_i.y : of_i.y)),
+    asfloat(asint(p.z)+((p.z < 0) ? -of_i.z : of_i.z)));
+
+    return float3(abs(p.x) < origin ? p.x + floatScale * n.x : p_i.x,
+                  abs(p.y) < origin ? p.y + floatScale * n.y : p_i.y,
+                  abs(p.z) < origin ? p.z + floatScale * n.z : p_i.z);
+}
+#else
 float3 RayOffset(float3 P, float3 Ng)
 {
-    return P + Ng * 0.002;
+    return P + Ng * 0.001;
 }
+#endif
 
 bool IntersectsTriangle(Ray ray, float3 v0, float3 v1, float3 v2, out float t, out float u, out float v)
 {
@@ -143,6 +164,9 @@ bool SceneIntersects(Ray ray, out Intersection intersection)
     stack[stackIndex++] = 0;
 
     intersection.t = 1e30;
+    intersection.u = 0;
+    intersection.v = 0;
+    intersection.prim = -1;
     intersection.depth = 0;
     intersection.shader = -1;
     intersection.object = -1;

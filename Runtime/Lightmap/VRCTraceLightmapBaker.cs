@@ -74,9 +74,15 @@ public class VRCTraceLightmapBaker : UdonSharpBehaviour
             _sampleIndices[swapIndex] = temp;
         }
     }
-
+    bool _reset;
     public void ResetSamples()
     {
+        _reset = true;
+    }
+
+    void HandleResetSamples()
+    {
+        _reset = false;
         _sample = 0;
 
         VRCGraphics.Blit(Texture2D.blackTexture, _rtL0);
@@ -123,6 +129,10 @@ public class VRCTraceLightmapBaker : UdonSharpBehaviour
 
     void Update()
     {
+        if (_reset)
+        {
+            HandleResetSamples();
+        }
         if (_sample < sampleCount)
         {
             BakeSample();
