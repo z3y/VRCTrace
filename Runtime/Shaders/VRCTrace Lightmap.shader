@@ -1,9 +1,10 @@
-Shader "Unlit/VRCTrace Camera"
+Shader "Unlit/VRCTrace Lightmap"
 {
     Properties
     {
-        _MainTex ("Texture", 2D) = "white" {}
-        _Color("Color", Color) = (1,1,1,1)
+        _UdonVRCTraceLightmapPositionBuffer ("Position Buffer", 2D) = "black" {}
+        _UdonVRCTraceLightmapNormalBuffer ("Normal Buffer", 2D) = "black" {}
+
         _LightPosition ("Light Position", Vector) = (0,1,0,0)
         _LightRadius ("Light Position", Float) = 0.1
     }
@@ -31,31 +32,59 @@ Shader "Unlit/VRCTrace Camera"
             struct v2f
             {
                 float2 uv : TEXCOORD0;
-                float3 positionWS : TEXCOORD1;
-                float3 normalWS : TEXCOORD2;
                 float4 vertex : SV_POSITION;
             };
 
             v2f vert (appdata v)
             {
                 v2f o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv = v.uv;
-                o.positionWS = mul(unity_ObjectToWorld, v.vertex).xyz;
-                o.normalWS = UnityObjectToWorldNormal(v.normal);
+                // o.vertex = UnityObjectToClipPos(v.vertex);
+
+                float4 uv = float4(0,0,0,1);
+                uv.xy = v.uv.xy * 2 - 1;
+                uv.y *= _ProjectionParams.x;
+                o.vertex = uv;
+                o.uv = v.uv.xy;
+
+                // o.uv = v.uv;
+                float3 objectPosition = UNITY_MATRIX_M._m03_m13_m23;
+                if (distance(_WorldSpaceCameraPos.xyz, objectPosition) > 2)
+                {
+                    o.vertex = asfloat(-1);
+                }
                 return o;
             }
 
-            float4 _Color;
+            Texture2D<float4> _UdonVRCTraceLightmapPositionBuffer;
+            SamplerState sampler_UdonVRCTraceLightmapPositionBuffer;
+            Texture2D<float4> _UdonVRCTraceLightmapNormalBuffer;
+            Texture2D<float4> _UdonVRCTraceLightmapCopy;
+
+            int _UdonVRCTraceSampleCount;
+            int _UdonVRCTraceSample;
+            int _UdonVRCTraceRandomSample;
+
             float3 _LightPosition;
             float _LightRadius;
 
             float4 frag (v2f i) : SV_Target
             {
-                float3 P = i.positionWS;
-                float3 N = i.normalWS;
+                float2 uv = i.uv;
 
-                float2 xi = GetRand(i.vertex.xy * _Time.y);
+                float4 positionBuffer = _UdonVRCTraceLightmapPositionBuffer.SampleLevel(sampler_UdonVRCTraceLightmapPositionBuffer, uv, 0);
+                float3 P = positionBuffer.rgb;
+                float3 N = _UdonVRCTraceLightmapNormalBuffer.SampleLevel(sampler_UdonVRCTraceLightmapPositionBuffer, uv, 0);
+
+                [branch]
+                if (positionBuffer.a <= 0)
+                {
+                    return 0;
+                }
+
+                float4 previousRt = _UdonVRCTraceLightmapCopy.SampleLevel(sampler_UdonVRCTraceLightmapPositionBuffer, uv, 0);
+
+                float2 xi = Hammersley(_UdonVRCTraceRandomSample, _UdonVRCTraceSampleCount);
+                xi = frac(xi + GetRand(i.vertex.xy));
 
                 float3 lightPosition = _LightPosition;
                 float lightRadius = _LightRadius;
@@ -66,7 +95,7 @@ Shader "Unlit/VRCTrace Camera"
                 float3 L = normalize(positionToLight);
                 float attenuation = 1.0 / length(positionToLight);
 
-                float3 diffuseColor = _Color;
+                float3 diffuseColor = 1;
 
                 Ray ray;
                 ray.D = L;
@@ -100,7 +129,7 @@ Shader "Unlit/VRCTrace Camera"
                     float3 hitP, hitN;
                     TrianglePointNormal(isect, hitP, hitN);
 
-                    // hitN = TriangleSmoothNormal(isect);
+                    // hitN = TriangleSmoothNormal(isect, hitN);
 
                     positionToLight = lightPosition - hitP;
                     L = normalize(positionToLight);
@@ -127,7 +156,12 @@ Shader "Unlit/VRCTrace Camera"
                     }
                 }
 
-                return float4(directDiffuse + indirectDiffuse, 1);
+                float3 diffuse = directDiffuse + indirectDiffuse;
+                float3 previousDiffuse = previousRt.rgb;
+
+                float3 accumulated = (previousDiffuse * _UdonVRCTraceSample + diffuse) / (_UdonVRCTraceSample + 1);
+
+                return float4(accumulated, 1);
             }
             ENDCG
         }

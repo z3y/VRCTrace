@@ -4,8 +4,8 @@ Texture2D<float4> _UdonVRCTraceVertices;
 Texture2D<float4> _UdonVRCTraceNormals;
 Texture2D<float4> _UdonVRCTraceBounds;
 
-int _UdonVRCTraceBoundsWidth;
-int _UdonVRCTraceDataWidth;
+uint _UdonVRCTraceBoundsWidth;
+uint _UdonVRCTraceDataWidth;
 
 struct Ray
 {
@@ -32,18 +32,18 @@ struct Bounds
 
 int2 DataIndex(int index)
 {
-    int width = _UdonVRCTraceDataWidth;
-    int h = (index / width) * 3;
-    int v = index % width;
+    uint width = _UdonVRCTraceDataWidth;
+    uint h = (index / width) * 3;
+    uint v = index % width;
 
     return int2(v, h);
 }
 
 int2 BoundsIndex(int index)
 {
-    int width = _UdonVRCTraceBoundsWidth;
-    int h = (index / width) * 2;
-    int v = index % width;
+    uint width = _UdonVRCTraceBoundsWidth;
+    uint h = (index / width) * 2;
+    uint v = index % width;
 
     return int2(v, h);
 }
@@ -112,7 +112,14 @@ void TrianglePointNormal(Intersection intersection, out float3 P, out float3 Ng)
     Ng = normalize(cross(v2 - v0, v1 - v0));
 }
 
-float3 TriangleSmoothNormal(Intersection intersection)
+inline float3 VRCTrace_SafeNormalize(float3 inVec)
+{
+    float dp3 = max(0.001f, dot(inVec, inVec));
+    return inVec * rsqrt(dp3);
+}
+
+// figure out whats wrong here
+float3 TriangleSmoothNormal(Intersection intersection, float3 Ng)
 {
     uint tri_index = intersection.prim;
     int2 data_idx = DataIndex(tri_index);
@@ -125,8 +132,8 @@ float3 TriangleSmoothNormal(Intersection intersection)
     float u = intersection.u;
     float v = intersection.v;
 
-    float3 N = normalize((1.0f - u - v) * n0 + u * n1 + v * n2);
-    return N;
+    float3 N = VRCTrace_SafeNormalize((1.0 - u - v) * n0 + u * n1 + v * n2);
+    return all(N == 0) ? Ng : N;
 }
 
 bool SceneIntersects(Ray ray, out Intersection intersection)

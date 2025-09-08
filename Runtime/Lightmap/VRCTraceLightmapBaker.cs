@@ -1,0 +1,114 @@
+﻿
+using UdonSharp;
+using UnityEngine;
+using VRC.SDKBase;
+using VRC.Udon;
+
+public class VRCTraceLightmapBaker : UdonSharpBehaviour
+{
+    public Camera computeCam;
+    public int resolution = 512;
+
+    RenderTexture _rtL0;
+    RenderTexture _rtL1;
+    RenderTexture _rtL0Copy;
+    RenderTexture _rtL1Copy;
+    int _sample = 0;
+    public int sampleCount = 512;
+
+    int[] _sampleIndices;
+
+    public bool monoSH;
+
+    void Start()
+    {
+        InitRt();
+
+        InitRandomSample();
+        ResetSamples();
+    }
+
+    void InitRt()
+    {
+        var desc = new RenderTextureDescriptor();
+        desc.autoGenerateMips = false;
+        desc.width = resolution;
+        desc.height = resolution;
+        desc.useMipMap = false;
+        desc.colorFormat = RenderTextureFormat.ARGBFloat;
+        desc.sRGB = false;
+        desc.volumeDepth = 1;
+        desc.msaaSamples = 1;
+        desc.dimension = UnityEngine.Rendering.TextureDimension.Tex2D;
+
+        _rtL0 = new RenderTexture(desc);
+        _rtL0.depth = 0;
+
+        _rtL0Copy = new RenderTexture(desc);
+        _rtL0Copy.depth = 0;
+
+        if (monoSH)
+        {
+            _rtL1 = new RenderTexture(desc);
+            _rtL1.depth = 0;
+
+            _rtL1Copy = new RenderTexture(desc);
+            _rtL1Copy.depth = 0;
+        }
+    }
+
+
+    void InitRandomSample()
+    {
+        _sampleIndices = new int[sampleCount];
+        for (int i = 0; i < sampleCount; i++)
+        {
+            _sampleIndices[i] = i;
+        }
+
+        for (int i = 0; i < _sampleIndices.Length; i++)
+        {
+            int swapIndex = Random.Range(i, _sampleIndices.Length);
+            int temp = _sampleIndices[i];
+            _sampleIndices[i] = _sampleIndices[swapIndex];
+            _sampleIndices[swapIndex] = temp;
+        }
+    }
+
+    public void ResetSamples()
+    {
+        _sample = 0;
+
+        VRCGraphics.Blit(Texture2D.blackTexture, _rtL0);
+        VRCGraphics.Blit(Texture2D.blackTexture, _rtL0Copy);
+        VRCShader.SetGlobalInteger(VRCShader.PropertyToID("_UdonVRCTraceSampleCount"), sampleCount);
+
+        VRCShader.SetGlobalTexture(VRCShader.PropertyToID("_UdonVRCTraceLightmap"), _rtL0);
+        VRCShader.SetGlobalTexture(VRCShader.PropertyToID("_UdonVRCTraceLightmapCopy"), _rtL0Copy);
+
+        var buffers = new RenderBuffer[] { _rtL0.colorBuffer };
+        computeCam.SetTargetBuffers(buffers, _rtL0.depthBuffer);
+        computeCam.enabled = false;
+    }
+
+    void BakeSample()
+    {
+        VRCShader.SetGlobalInteger(VRCShader.PropertyToID("_UdonVRCTraceSample"), _sample);
+        int randSample = _sampleIndices[_sample];
+        VRCShader.SetGlobalInteger(VRCShader.PropertyToID("_UdonVRCTraceRandomSample"), randSample);
+        computeCam.Render();
+        VRCGraphics.Blit(_rtL0, _rtL0Copy);
+
+        _sample++;
+    }
+
+    void Update()
+    {
+        if (_sample < sampleCount)
+        {
+            BakeSample();
+            BakeSample();
+        }
+
+    }
+}
