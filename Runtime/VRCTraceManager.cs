@@ -44,16 +44,6 @@ namespace VRCTrace
             VRCShader.SetGlobalInteger(VRCShader.PropertyToID("_UdonVRCTraceDataWidth"), verticesBuffer.width);
         }
 
-        public void ClearGlobals()
-        {
-            VRCShader.SetGlobalTexture(VRCShader.PropertyToID("_UdonVRCTraceBounds"), null);
-            VRCShader.SetGlobalTexture(VRCShader.PropertyToID("_UdonVRCTraceVertices"), null);
-            VRCShader.SetGlobalTexture(VRCShader.PropertyToID("_UdonVRCTraceNormals"), null);
-
-            VRCShader.SetGlobalInteger(VRCShader.PropertyToID("_UdonVRCTraceBoundsWidth"), 0);
-            VRCShader.SetGlobalInteger(VRCShader.PropertyToID("_UdonVRCTraceDataWidth"), 0);
-        }
-
         object _bvh = null;
 #if UNITY_EDITOR && !COMPILER_UDONSHARP
         private void OnDrawGizmosSelected()
@@ -77,7 +67,6 @@ namespace VRCTrace
 
         public void GenerateBuffers()
         {
-            ClearGlobals();
 
             var renderer = GetStaticRenderers();
 
@@ -196,13 +185,22 @@ namespace VRCTrace
 
             string sceneFolder = Path.GetDirectoryName(SceneManager.GetActiveScene().path);
 
-            AssetDatabase.CreateAsset(tri_verts_buffer, Path.Combine(sceneFolder, "VRCTraceVertices.asset"));
-            AssetDatabase.CreateAsset(tri_normals_buffer, Path.Combine(sceneFolder, "VRCTraceNormals.asset"));
-            AssetDatabase.CreateAsset(bounds_buffer, Path.Combine(sceneFolder, "VRCTraceBounds.asset"));
-            AssetDatabase.Refresh();
-            boundsBuffer = bounds_buffer;
-            verticesBuffer = tri_verts_buffer;
-            normalsBuffer = tri_normals_buffer;
+            string vertPath = Path.Combine(sceneFolder, "VRCTraceVertices.asset");
+            string normPath = Path.Combine(sceneFolder, "VRCTraceNormals.asset");
+            string boundPath = Path.Combine(sceneFolder, "VRCTraceBounds.asset");
+
+            AssetDatabase.CreateAsset(tri_verts_buffer, vertPath);
+            AssetDatabase.CreateAsset(tri_normals_buffer, normPath);
+            AssetDatabase.CreateAsset(bounds_buffer, boundPath);
+
+            AssetDatabase.ImportAsset(vertPath);
+            AssetDatabase.ImportAsset(normPath);
+            AssetDatabase.ImportAsset(boundPath);
+
+            boundsBuffer = AssetDatabase.LoadAssetAtPath<Texture2D>(boundPath);
+            verticesBuffer = AssetDatabase.LoadAssetAtPath<Texture2D>(vertPath);
+            normalsBuffer = AssetDatabase.LoadAssetAtPath<Texture2D>(normPath);
+
             EditorUtility.SetDirty(this);
             SetGlobals();
         }
