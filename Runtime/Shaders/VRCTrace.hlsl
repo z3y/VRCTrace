@@ -308,6 +308,17 @@ float3 RandomPointOnSphere(float3 center, float radius, float2 xi)
     return center + dir * radius;
 }
 
+float3 RandomDirection(float2 xi)
+{
+    // xi ∈ [0,1]^2 (stratified random sample, e.g. Hammersley)
+    float z = 1.0 - 2.0 * xi.x;
+    float r = sqrt(max(0.0, 1.0 - z*z));
+    float phi = 2.0 * UNITY_PI * xi.y;
+
+    float3 dir = float3(r * cos(phi), r * sin(phi), z);
+    return dir;
+}
+
 uint3 HashPcg3d(uint3 v)
 {
   v = v * 1664525u + 1013904223u;

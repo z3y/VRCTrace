@@ -23,6 +23,9 @@ Shader "Unlit/VRCTrace Copy Light Volume"
             #include "Packages/red.sim.lightvolumes/Shaders/LightVolumes.cginc"
 
             Texture2D _BufferL0;
+            Texture2D _BufferL1x;
+            Texture2D _BufferL1y;
+            Texture2D _BufferL1z;
 
             uint2 Get2DCoord(int probeIndex)
             {
@@ -60,10 +63,28 @@ Shader "Unlit/VRCTrace Copy Light Volume"
 
                 uint2 coord = Get2DCoord(probeIndex);
 
-                if (slice >= resolution.z * 2)
+                float3 L0 = _BufferL0[coord].xyz;
+                float3 L1x = _BufferL1x[coord].xyz;
+                float3 L1y = _BufferL1y[coord].xyz;
+                float3 L1z = _BufferL1z[coord].xyz;
+
+                float3 L1r = float3(L1x.x, L1y.x, L1z.x);
+                float3 L1g = float3(L1x.y, L1y.y, L1z.y);
+                float3 L1b = float3(L1x.z, L1y.z, L1z.z);
+
+                if (slice >= resolution.z * 2) // texture 0
                 {
-                    return float4(_BufferL0[coord].xyz, 0);
+                    return float4(L0.xyz, L1r.z);
                 }
+                else if (slice <= resolution.z) // texture 1
+                {
+                    return float4(L1r.y, L1g.y, L1b.y, L1b.z);
+                }
+                else  // texture 2
+                {
+                    return float4(L1r.x, L1g.x, L1b.x, L1g.z);
+                }
+
 
                 return 0;
             }

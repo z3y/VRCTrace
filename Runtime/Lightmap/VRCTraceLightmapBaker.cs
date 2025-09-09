@@ -23,7 +23,10 @@ public class VRCTraceLightmapBaker : UdonSharpBehaviour
 
     public bool monoSH;
 
-    RenderTexture _rtProbeL0;
+    RenderTexture _rtProbeL0, _rtProbeL0Copy;
+    RenderTexture _rtProbeL1x, _rtProbeL1xCopy;
+    RenderTexture _rtProbeL1y, _rtProbeL1yCopy;
+    RenderTexture _rtProbeL1z, _rtProbeL1zCopy;
 
     void Start()
     {
@@ -65,10 +68,35 @@ public class VRCTraceLightmapBaker : UdonSharpBehaviour
         {
             desc.width = probesPositionBuffer.width;
             desc.height = probesPositionBuffer.height;
+
             _rtProbeL0 = new RenderTexture(desc);
             _rtProbeL0.depth = 0;
 
+            _rtProbeL1x = new RenderTexture(desc);
+            _rtProbeL1x.depth = 0;
+
+            _rtProbeL1y = new RenderTexture(desc);
+            _rtProbeL1y.depth = 0;
+
+            _rtProbeL1z = new RenderTexture(desc);
+            _rtProbeL1z.depth = 0;
+
+            _rtProbeL0Copy = new RenderTexture(desc);
+            _rtProbeL0Copy.depth = 0;
+
+            _rtProbeL1xCopy = new RenderTexture(desc);
+            _rtProbeL1xCopy.depth = 0;
+
+            _rtProbeL1yCopy = new RenderTexture(desc);
+            _rtProbeL1yCopy.depth = 0;
+
+            _rtProbeL1zCopy = new RenderTexture(desc);
+            _rtProbeL1zCopy.depth = 0;
+
             probesCopyMat.SetTexture("_BufferL0", _rtProbeL0);
+            probesCopyMat.SetTexture("_BufferL1x", _rtProbeL1x);
+            probesCopyMat.SetTexture("_BufferL1y", _rtProbeL1y);
+            probesCopyMat.SetTexture("_BufferL1z", _rtProbeL1z);
         }
     }
 
@@ -128,7 +156,13 @@ public class VRCTraceLightmapBaker : UdonSharpBehaviour
         computeProbesCam.enabled = false;
         if (probesPositionBuffer)
         {
-            var probeBuffers = new RenderBuffer[] { _rtProbeL0.colorBuffer };
+
+            VRCShader.SetGlobalTexture(VRCShader.PropertyToID("_UdonVRCTraceProbesL0Copy"), _rtProbeL0Copy);
+            VRCShader.SetGlobalTexture(VRCShader.PropertyToID("_UdonVRCTraceProbesL1xCopy"), _rtProbeL1xCopy);
+            VRCShader.SetGlobalTexture(VRCShader.PropertyToID("_UdonVRCTraceProbesL1yCopy"), _rtProbeL1yCopy);
+            VRCShader.SetGlobalTexture(VRCShader.PropertyToID("_UdonVRCTraceProbesL1zCopy"), _rtProbeL1zCopy);
+
+            var probeBuffers = new RenderBuffer[] { _rtProbeL0.colorBuffer, _rtProbeL1x.colorBuffer, _rtProbeL1y.colorBuffer, _rtProbeL1z.colorBuffer };
             computeProbesCam.SetTargetBuffers(probeBuffers, _rtProbeL0.depthBuffer);
         }
     }
@@ -152,6 +186,11 @@ public class VRCTraceLightmapBaker : UdonSharpBehaviour
     void BakeProbeSample()
     {
         computeProbesCam.Render();
+
+        VRCGraphics.Blit(_rtProbeL0, _rtProbeL0Copy);
+        VRCGraphics.Blit(_rtProbeL1x, _rtProbeL1xCopy);
+        VRCGraphics.Blit(_rtProbeL1y, _rtProbeL1yCopy);
+        VRCGraphics.Blit(_rtProbeL1z, _rtProbeL1zCopy);
     }
 
     void Update()
@@ -162,13 +201,16 @@ public class VRCTraceLightmapBaker : UdonSharpBehaviour
         }
         if (_sample < sampleCount)
         {
-            BakeSample();
-            BakeSample();
-        }
 
-        if (probesPositionBuffer)
-        {
-            BakeProbeSample();
+            // BakeSample();
+            BakeSample();
+
+            if (probesPositionBuffer)
+            {
+                // BakeProbeSample();
+                BakeProbeSample();
+            }
+
         }
 
     }
