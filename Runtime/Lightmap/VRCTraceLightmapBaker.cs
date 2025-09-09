@@ -7,6 +7,9 @@ using VRC.Udon;
 public class VRCTraceLightmapBaker : UdonSharpBehaviour
 {
     public Camera computeCam;
+    public Camera computeProbesCam;
+    public Texture2D probesPositionBuffer;
+    public Material probesCopyMat;
     public int resolution = 512;
 
     RenderTexture _rtL0;
@@ -19,6 +22,8 @@ public class VRCTraceLightmapBaker : UdonSharpBehaviour
     int[] _sampleIndices;
 
     public bool monoSH;
+
+    RenderTexture _rtProbeL0;
 
     void Start()
     {
@@ -54,6 +59,16 @@ public class VRCTraceLightmapBaker : UdonSharpBehaviour
 
             _rtL1Copy = new RenderTexture(desc);
             _rtL1Copy.depth = 0;
+        }
+
+        if (probesPositionBuffer)
+        {
+            desc.width = probesPositionBuffer.width;
+            desc.height = probesPositionBuffer.height;
+            _rtProbeL0 = new RenderTexture(desc);
+            _rtProbeL0.depth = 0;
+
+            probesCopyMat.SetTexture("_BufferL0", _rtProbeL0);
         }
     }
 
@@ -109,6 +124,13 @@ public class VRCTraceLightmapBaker : UdonSharpBehaviour
         }
         computeCam.SetTargetBuffers(buffers, _rtL0.depthBuffer);
         computeCam.enabled = false;
+
+        computeProbesCam.enabled = false;
+        if (probesPositionBuffer)
+        {
+            var probeBuffers = new RenderBuffer[] { _rtProbeL0.colorBuffer };
+            computeProbesCam.SetTargetBuffers(probeBuffers, _rtProbeL0.depthBuffer);
+        }
     }
 
     void BakeSample()
@@ -127,6 +149,11 @@ public class VRCTraceLightmapBaker : UdonSharpBehaviour
         _sample++;
     }
 
+    void BakeProbeSample()
+    {
+        computeProbesCam.Render();
+    }
+
     void Update()
     {
         if (_reset)
@@ -137,6 +164,11 @@ public class VRCTraceLightmapBaker : UdonSharpBehaviour
         {
             BakeSample();
             BakeSample();
+        }
+
+        if (probesPositionBuffer)
+        {
+            BakeProbeSample();
         }
 
     }

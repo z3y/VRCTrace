@@ -4,6 +4,7 @@ Shader "Unlit/VRCTrace Lightmap"
     {
         _UdonVRCTraceLightmapPositionBuffer ("Position Buffer", 2D) = "black" {}
         _UdonVRCTraceLightmapNormalBuffer ("Normal Buffer", 2D) = "black" {}
+        // _BlueNoise ("Blue Noise", 2D) = "black" {}
 
         _LightPosition ("Light Position", Vector) = (0,1,0,0)
         _LightRadius ("Light Position", Float) = 0.1
@@ -64,6 +65,7 @@ Shader "Unlit/VRCTrace Lightmap"
             Texture2D<float4> _UdonVRCTraceLightmapNormalBuffer;
             Texture2D<float4> _UdonVRCTraceLightmapCopy;
             Texture2D<float4> _UdonVRCTraceLightmapL1Copy;
+            // Texture2D<float4> _BlueNoise;
 
             int _UdonVRCTraceSampleCount;
             int _UdonVRCTraceSample;
@@ -98,11 +100,14 @@ Shader "Unlit/VRCTrace Lightmap"
 
                 // P.xz -= 0.01;
 
+                // float4 noise = _BlueNoise[int2(i.vertex.xy)];
+
                 float4 previousRt = _UdonVRCTraceLightmapCopy.SampleLevel(sampler_UdonVRCTraceLightmapPositionBuffer, uv, 0);
                 float4 previousRt1 = _UdonVRCTraceLightmapL1Copy.SampleLevel(sampler_UdonVRCTraceLightmapPositionBuffer, uv, 0);
 
                 float2 xi = Hammersley(_UdonVRCTraceRandomSample, _UdonVRCTraceSampleCount);
                 xi = frac(xi + GetRand(i.vertex.xy));
+                // xi = frac(xi + noise.xy);
 
                 float3 lightPosition = _LightPosition;
                 float lightRadius = _LightRadius;
@@ -143,7 +148,7 @@ Shader "Unlit/VRCTrace Lightmap"
 
 
                 Intersection isect;
-                if (SceneIntersects(ray, isect))
+                if (TraceRay(ray, isect))
                 {
                     if (isect.t < length(positionToLight))
                     {
@@ -166,7 +171,7 @@ Shader "Unlit/VRCTrace Lightmap"
                 float3 L1y_1 = 0;
                 float3 L1z_1 = 0;
 
-                if (SceneIntersects(ray, isect))
+                if (TraceRay(ray, isect))
                 {
                     float3 hitP, hitN;
                     TrianglePointNormal(isect, hitP, hitN);
@@ -198,7 +203,7 @@ Shader "Unlit/VRCTrace Lightmap"
                         L1y_1 = Li * (cosTheta * newDir.y) * Y1;
                         L1z_1 = Li * (cosTheta * newDir.z) * Y1;
 
-                        if (SceneIntersects(ray, isect)) {
+                        if (TraceRay(ray, isect)) {
                             if (isect.t < length(positionToLight))
                             {
                                 indirectDiffuse = 0;

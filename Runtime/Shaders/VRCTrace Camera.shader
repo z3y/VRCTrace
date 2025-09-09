@@ -80,7 +80,7 @@ Shader "Unlit/VRCTrace Camera"
                 float3 directDiffuse = Li * cosTheta;
 
                 Intersection isect;
-                if (SceneIntersects(ray, isect))
+                if (TraceRay(ray, isect))
                 {
                     if (isect.t < length(positionToLight))
                     {
@@ -95,7 +95,7 @@ Shader "Unlit/VRCTrace Camera"
 
                 float3 indirectDiffuse = 0;
 
-                if (SceneIntersects(ray, isect))
+                if (TraceRay(ray, isect))
                 {
                     float3 hitP, hitN;
                     TrianglePointNormal(isect, hitP, hitN);
@@ -121,7 +121,7 @@ Shader "Unlit/VRCTrace Camera"
                     if (cosTheta > 0 && !isBackFace)
                     {
                         indirectDiffuse = Li * cosTheta;
-                        if (SceneIntersects(ray, isect)) {
+                        if (TraceRay(ray, isect)) {
                             if (isect.t < length(positionToLight)) {
                                 indirectDiffuse = 0;
                             }

@@ -1,0 +1,73 @@
+Shader "Unlit/VRCTrace Copy Light Volume"
+{
+    Properties
+    {
+        _BufferL0 ("L0", 2D) = "black" {}
+        _BufferL1x ("L1x", 2D) = "black" {}
+        _BufferL1y ("L1y", 2D) = "black" {}
+        _BufferL1z ("L1z", 2D) = "black" {}
+    }
+    SubShader
+    {
+        Tags { "RenderType"="Opaque" }
+
+        Pass
+        {
+            CGPROGRAM
+            #pragma vertex CustomRenderTextureVertexShader
+            #pragma fragment frag
+            #pragma target 5.0
+
+            #include "UnityCG.cginc"
+            #include "UnityCustomRenderTexture.cginc"
+            #include "Packages/red.sim.lightvolumes/Shaders/LightVolumes.cginc"
+
+            Texture2D _BufferL0;
+
+            uint2 Get2DCoord(int probeIndex)
+            {
+                uint2 wh;
+                _BufferL0.GetDimensions(wh.x, wh.y);
+
+                uint h = probeIndex / wh.x;
+                uint v = probeIndex % wh.x;
+
+                return uint2(v, h);
+            }
+
+            float4 frag(v2f_customrendertexture i) : COLOR
+            {
+                uint id = 0;
+                uint uvwID = id * 6;
+
+                float3 localUVW = i.localTexcoord.xyz;
+                localUVW.z = frac(localUVW.z * 3);
+
+                int3 resolution = int3(38, 12, 111 / 3);
+
+                int3 pixelCoord = localUVW * resolution;
+
+                int slice = _CustomRenderTexture3DSlice;
+
+
+                resolution -= 2;
+                pixelCoord = clamp(pixelCoord, 1, resolution-1);
+                uint width = resolution.x;
+                uint height = resolution.y;
+                uint probeIndex = pixelCoord.x + pixelCoord.y * width + pixelCoord.z * (width * height);
+
+                // return float4(probeIndex == 2, 0, 0, 1);
+
+                uint2 coord = Get2DCoord(probeIndex);
+
+                if (slice >= resolution.z * 2)
+                {
+                    return float4(_BufferL0[coord].xyz, 0);
+                }
+
+                return 0;
+            }
+            ENDCG
+        }
+    }
+}

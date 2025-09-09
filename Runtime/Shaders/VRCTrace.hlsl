@@ -157,7 +157,7 @@ float3 TriangleSmoothNormal(Intersection intersection, float3 Ng)
     return all(N == 0) ? Ng : N;
 }
 
-bool SceneIntersects(Ray ray, out Intersection intersection)
+bool TraceRay(Ray ray, out Intersection intersection)
 {
     int stack[32];
     int stackIndex = 0;
