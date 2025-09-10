@@ -6,6 +6,7 @@ Shader "Unlit/VRCTrace Camera"
         _Color("Color", Color) = (1,1,1,1)
         _LightPosition ("Light Position", Vector) = (0,1,0,0)
         _LightRadius ("Light Position", Float) = 0.1
+        _Roughness("Roughness", Range(0, 1)) = 0
     }
     SubShader
     {
@@ -44,6 +45,7 @@ Shader "Unlit/VRCTrace Camera"
             float4 _Color;
             float3 _LightPosition;
             float _LightRadius;
+            float _Roughness;
 
             float3 TraceDiffuse(float3 P, float3 N, float2 xi)
             {
@@ -79,7 +81,9 @@ Shader "Unlit/VRCTrace Camera"
                     }
                 }
 
-                float3 newDir = RandomDirectionInHemisphere(N, xi);
+                float3 viewDir = normalize(_WorldSpaceCameraPos.xyz - P);
+                float3 reflDir = reflect(-viewDir, N);
+                float3 newDir = lerp(reflDir, RandomDirectionInHemisphere(N, xi), _Roughness * _Roughness);
 
                 ray.D = newDir;
                 ray.P = RayOffset(P, ray.D);
@@ -102,7 +106,7 @@ Shader "Unlit/VRCTrace Camera"
                     ray.D = L;
                     ray.P = RayOffset(hitP, ray.D);
 
-                    diffuseColor = isect.object == 3 ? float3(0,1,0) : diffuseColor;
+                    diffuseColor = isect.object == 9 ? float3(0,1,0) : diffuseColor;
 
                     Li = attenuation * lightColor * diffuseColor;
                     cosTheta = max(0.0, dot(hitN, L));
@@ -120,7 +124,7 @@ Shader "Unlit/VRCTrace Camera"
                     }
                 }
 
-                return directDiffuse + indirectDiffuse;
+                return lerp(0, directDiffuse, _Roughness * _Roughness) + indirectDiffuse;
             }
 
 
