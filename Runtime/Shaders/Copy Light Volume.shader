@@ -68,23 +68,41 @@ Shader "Unlit/VRCTrace Copy Light Volume"
                 float3 L1y = _BufferL1y[coord].xyz;
                 float3 L1z = _BufferL1z[coord].xyz;
 
+                L0 *= UNITY_PI;
+                L1x *= 2.0 * UNITY_PI / 3.0;
+                L1y *= 2.0 * UNITY_PI / 3.0;
+                L1z *= 2.0 * UNITY_PI / 3.0;
+
                 float3 L1r = float3(L1x.x, L1y.x, L1z.x);
                 float3 L1g = float3(L1x.y, L1y.y, L1z.y);
                 float3 L1b = float3(L1x.z, L1y.z, L1z.z);
 
-                if (slice >= resolution.z * 2) // texture 0
-                {
-                    return float4(L0.xyz, L1r.z);
-                }
-                else if (slice <= resolution.z) // texture 1
+
+                // if (slice >= resolution.z * 2) // texture 0
+                // {
+                //     return float4(L0.xyz, L1r.z);
+                // }
+                // else if (slice <= resolution.z) // texture 1
+                // {
+                //     return float4(L1r.y, L1g.y, L1b.y, L1g.z);
+                // }
+                // else  // texture 2
+                // {
+                //     return float4(L1r.x, L1g.x, L1b.x, L1b.z);
+                // }
+
+                if (slice >= resolution.z * 2) // texture 2
                 {
                     return float4(L1r.y, L1g.y, L1b.y, L1b.z);
                 }
-                else  // texture 2
+                else if (slice <= resolution.z) // texture 0
+                {
+                    return float4(L0, L1r.z);
+                }
+                else  // texture 1
                 {
                     return float4(L1r.x, L1g.x, L1b.x, L1g.z);
                 }
-
 
                 return 0;
             }
