@@ -59,8 +59,8 @@ Shader "Unlit/VRCTrace Copy Light Volume"
                 uint2 coord = Get2DCoord(probeIndex);
 
                 float4 tex0 = _BufferTex0[coord];
-                float4 tex1 = _BufferTex0[coord];
-                float4 tex2 = _BufferTex0[coord];
+                float4 tex1 = _BufferTex1[coord];
+                float4 tex2 = _BufferTex2[coord];
 
                 float3 L0 = float3(tex0.a, tex1.a, tex2.a);
                 float3 L1x = tex0.xyz;
