@@ -10,7 +10,7 @@ public class VRCTraceLightmapBaker : UdonSharpBehaviour
     public Camera computeProbesCam;
     public Texture2D probesPositionBuffer;
     public Material probesCopyMat;
-    public int resolution = 512;
+    public int lightmapResolution = 512;
 
     RenderTexture _rtL0;
     RenderTexture _rtL1;
@@ -19,17 +19,26 @@ public class VRCTraceLightmapBaker : UdonSharpBehaviour
     int _sample = 0;
     public int sampleCount = 512;
 
+    int _probeSample = 0;
+    public int probeSampleCount = 64;
+
     int[] _sampleIndices;
+    int[] _probeSampleIndices;
 
     public bool monoSH;
 
-    RenderTexture _rtProbeL0, _rtProbeL0Copy;
-    RenderTexture _rtProbeL1x, _rtProbeL1xCopy;
-    RenderTexture _rtProbeL1y, _rtProbeL1yCopy;
-    RenderTexture _rtProbeL1z, _rtProbeL1zCopy;
+    RenderTexture _rtProbeTex0, _rtProbeTex0Copy;
+    RenderTexture _rtProbeTex1, _rtProbeTex1Copy;
+    RenderTexture _rtProbeTex2, _rtProbeTex2Copy;
+
+    public bool traceLightmap = false;
+    public bool traceProbes = false;
 
     void Start()
     {
+        computeCam.enabled = false;
+        computeProbesCam.enabled = false;
+
         InitRt();
 
         InitRandomSample();
@@ -40,8 +49,8 @@ public class VRCTraceLightmapBaker : UdonSharpBehaviour
     {
         var desc = new RenderTextureDescriptor();
         desc.autoGenerateMips = false;
-        desc.width = resolution;
-        desc.height = resolution;
+        desc.width = lightmapResolution;
+        desc.height = lightmapResolution;
         desc.useMipMap = false;
         desc.colorFormat = RenderTextureFormat.ARGBFloat;
         desc.sRGB = false;
@@ -49,72 +58,89 @@ public class VRCTraceLightmapBaker : UdonSharpBehaviour
         desc.msaaSamples = 1;
         desc.dimension = UnityEngine.Rendering.TextureDimension.Tex2D;
 
-        _rtL0 = new RenderTexture(desc);
-        _rtL0.depth = 0;
-
-        _rtL0Copy = new RenderTexture(desc);
-        _rtL0Copy.depth = 0;
-
-        if (monoSH)
+        if (traceLightmap)
         {
-            _rtL1 = new RenderTexture(desc);
-            _rtL1.depth = 0;
+            _rtL0 = new RenderTexture(desc);
+            _rtL0.depth = 0;
 
-            _rtL1Copy = new RenderTexture(desc);
-            _rtL1Copy.depth = 0;
+            _rtL0Copy = new RenderTexture(desc);
+            _rtL0Copy.depth = 0;
+
+            if (monoSH)
+            {
+                _rtL1 = new RenderTexture(desc);
+                _rtL1.depth = 0;
+
+                _rtL1Copy = new RenderTexture(desc);
+                _rtL1Copy.depth = 0;
+            }
         }
 
-        if (probesPositionBuffer)
+        if (traceProbes)
         {
             desc.width = probesPositionBuffer.width;
             desc.height = probesPositionBuffer.height;
 
-            _rtProbeL0 = new RenderTexture(desc);
-            _rtProbeL0.depth = 0;
+            _rtProbeTex0 = new RenderTexture(desc);
+            _rtProbeTex0.depth = 0;
 
-            _rtProbeL1x = new RenderTexture(desc);
-            _rtProbeL1x.depth = 0;
+            _rtProbeTex1 = new RenderTexture(desc);
+            _rtProbeTex1.depth = 0;
 
-            _rtProbeL1y = new RenderTexture(desc);
-            _rtProbeL1y.depth = 0;
+            _rtProbeTex2 = new RenderTexture(desc);
+            _rtProbeTex2.depth = 0;
 
-            _rtProbeL1z = new RenderTexture(desc);
-            _rtProbeL1z.depth = 0;
+            _rtProbeTex0Copy = new RenderTexture(desc);
+            _rtProbeTex0Copy.depth = 0;
 
-            _rtProbeL0Copy = new RenderTexture(desc);
-            _rtProbeL0Copy.depth = 0;
+            _rtProbeTex1Copy = new RenderTexture(desc);
+            _rtProbeTex1Copy.depth = 0;
 
-            _rtProbeL1xCopy = new RenderTexture(desc);
-            _rtProbeL1xCopy.depth = 0;
+            _rtProbeTex2Copy = new RenderTexture(desc);
+            _rtProbeTex2Copy.depth = 0;
 
-            _rtProbeL1yCopy = new RenderTexture(desc);
-            _rtProbeL1yCopy.depth = 0;
 
-            _rtProbeL1zCopy = new RenderTexture(desc);
-            _rtProbeL1zCopy.depth = 0;
-
-            probesCopyMat.SetTexture("_BufferL0", _rtProbeL0);
-            probesCopyMat.SetTexture("_BufferL1x", _rtProbeL1x);
-            probesCopyMat.SetTexture("_BufferL1y", _rtProbeL1y);
-            probesCopyMat.SetTexture("_BufferL1z", _rtProbeL1z);
+            probesCopyMat.SetTexture("_BufferTex0", _rtProbeTex0);
+            probesCopyMat.SetTexture("_BufferTex1", _rtProbeTex1);
+            probesCopyMat.SetTexture("_BufferTex2", _rtProbeTex2);
         }
     }
 
 
     void InitRandomSample()
     {
-        _sampleIndices = new int[sampleCount];
-        for (int i = 0; i < sampleCount; i++)
+        if (traceLightmap)
         {
-            _sampleIndices[i] = i;
-        }
 
-        for (int i = 0; i < _sampleIndices.Length; i++)
+            _sampleIndices = new int[sampleCount];
+            for (int i = 0; i < sampleCount; i++)
+            {
+                _sampleIndices[i] = i;
+            }
+
+            for (int i = 0; i < _sampleIndices.Length; i++)
+            {
+                int swapIndex = Random.Range(i, _sampleIndices.Length);
+                int temp = _sampleIndices[i];
+                _sampleIndices[i] = _sampleIndices[swapIndex];
+                _sampleIndices[swapIndex] = temp;
+            }
+        }
+        if (traceProbes)
         {
-            int swapIndex = Random.Range(i, _sampleIndices.Length);
-            int temp = _sampleIndices[i];
-            _sampleIndices[i] = _sampleIndices[swapIndex];
-            _sampleIndices[swapIndex] = temp;
+            _probeSampleIndices = new int[probeSampleCount];
+            for (int i = 0; i < probeSampleCount; i++)
+            {
+                _probeSampleIndices[i] = i;
+            }
+
+            for (int i = 0; i < _probeSampleIndices.Length; i++)
+            {
+                int swapIndex = Random.Range(i, _probeSampleIndices.Length);
+                int temp = _probeSampleIndices[i];
+                _probeSampleIndices[i] = _probeSampleIndices[swapIndex];
+                _probeSampleIndices[swapIndex] = temp;
+            }
         }
     }
     bool _reset;
@@ -127,51 +153,64 @@ public class VRCTraceLightmapBaker : UdonSharpBehaviour
     {
         _reset = false;
         _sample = 0;
+        _probeSample = 0;
 
-        VRCGraphics.Blit(Texture2D.blackTexture, _rtL0);
-        VRCGraphics.Blit(Texture2D.blackTexture, _rtL0Copy);
-        VRCShader.SetGlobalInteger(VRCShader.PropertyToID("_UdonVRCTraceSampleCount"), sampleCount);
-
-        VRCShader.SetGlobalTexture(VRCShader.PropertyToID("_UdonVRCTraceLightmap"), _rtL0);
-        VRCShader.SetGlobalTexture(VRCShader.PropertyToID("_UdonVRCTraceLightmapCopy"), _rtL0Copy);
-
-        RenderBuffer[] buffers;
-        if (monoSH)
+        if (traceLightmap)
         {
-            VRCShader.SetGlobalTexture(VRCShader.PropertyToID("_UdonVRCTraceLightmapL1"), _rtL1);
-            VRCShader.SetGlobalTexture(VRCShader.PropertyToID("_UdonVRCTraceLightmapL1Copy"), _rtL1Copy);
+            VRCShader.SetGlobalInteger(VRCShader.PropertyToID("_UdonVRCTraceSampleCount"), sampleCount);
 
-            VRCGraphics.Blit(Texture2D.blackTexture, _rtL1);
-            VRCGraphics.Blit(Texture2D.blackTexture, _rtL1Copy);
+            VRCShader.SetGlobalTexture(VRCShader.PropertyToID("_UdonVRCTraceLightmap"), _rtL0);
+            VRCShader.SetGlobalTexture(VRCShader.PropertyToID("_UdonVRCTraceLightmapCopy"), _rtL0Copy);
 
-            buffers = new RenderBuffer[] { _rtL0.colorBuffer, _rtL1.colorBuffer };
+
+            VRCGraphics.Blit(Texture2D.blackTexture, _rtL0);
+            VRCGraphics.Blit(Texture2D.blackTexture, _rtL0Copy);
+
+            RenderBuffer[] buffers;
+
+            if (monoSH)
+            {
+                VRCShader.SetGlobalTexture(VRCShader.PropertyToID("_UdonVRCTraceLightmapL1"), _rtL1);
+                VRCShader.SetGlobalTexture(VRCShader.PropertyToID("_UdonVRCTraceLightmapL1Copy"), _rtL1Copy);
+
+                VRCGraphics.Blit(Texture2D.blackTexture, _rtL1);
+                VRCGraphics.Blit(Texture2D.blackTexture, _rtL1Copy);
+
+                buffers = new RenderBuffer[] { _rtL0.colorBuffer, _rtL1.colorBuffer };
+            }
+            else
+            {
+                buffers = new RenderBuffer[] { _rtL0.colorBuffer };
+            }
+            computeCam.SetTargetBuffers(buffers, _rtL0.depthBuffer);
         }
-        else
+
+        if (traceProbes)
         {
-            buffers = new RenderBuffer[] { _rtL0.colorBuffer };
-        }
-        computeCam.SetTargetBuffers(buffers, _rtL0.depthBuffer);
-        computeCam.enabled = false;
+            VRCShader.SetGlobalInteger(VRCShader.PropertyToID("_UdonVRCTraceProbeSampleCount"), probeSampleCount);
 
-        computeProbesCam.enabled = false;
-        if (probesPositionBuffer)
-        {
+            VRCGraphics.Blit(Texture2D.blackTexture, _rtProbeTex0Copy);
+            VRCGraphics.Blit(Texture2D.blackTexture, _rtProbeTex1Copy);
+            VRCGraphics.Blit(Texture2D.blackTexture, _rtProbeTex2Copy);
 
-            VRCShader.SetGlobalTexture(VRCShader.PropertyToID("_UdonVRCTraceProbesL0Copy"), _rtProbeL0Copy);
-            VRCShader.SetGlobalTexture(VRCShader.PropertyToID("_UdonVRCTraceProbesL1xCopy"), _rtProbeL1xCopy);
-            VRCShader.SetGlobalTexture(VRCShader.PropertyToID("_UdonVRCTraceProbesL1yCopy"), _rtProbeL1yCopy);
-            VRCShader.SetGlobalTexture(VRCShader.PropertyToID("_UdonVRCTraceProbesL1zCopy"), _rtProbeL1zCopy);
+            VRCShader.SetGlobalTexture(VRCShader.PropertyToID("_UdonVRCTraceProbesTex0Copy"), _rtProbeTex0Copy);
+            VRCShader.SetGlobalTexture(VRCShader.PropertyToID("_UdonVRCTraceProbesTex1Copy"), _rtProbeTex1Copy);
+            VRCShader.SetGlobalTexture(VRCShader.PropertyToID("_UdonVRCTraceProbesTex2Copy"), _rtProbeTex2Copy);
 
-            var probeBuffers = new RenderBuffer[] { _rtProbeL0.colorBuffer, _rtProbeL1x.colorBuffer, _rtProbeL1y.colorBuffer, _rtProbeL1z.colorBuffer };
-            computeProbesCam.SetTargetBuffers(probeBuffers, _rtProbeL0.depthBuffer);
+            var probeBuffers = new RenderBuffer[] { _rtProbeTex0.colorBuffer, _rtProbeTex1.colorBuffer, _rtProbeTex2.colorBuffer };
+            computeProbesCam.SetTargetBuffers(probeBuffers, _rtProbeTex0.depthBuffer);
         }
     }
 
-    void BakeSample()
+
+
+    void BakeLightmapSample()
     {
         VRCShader.SetGlobalInteger(VRCShader.PropertyToID("_UdonVRCTraceSample"), _sample);
         int randSample = _sampleIndices[_sample];
         VRCShader.SetGlobalInteger(VRCShader.PropertyToID("_UdonVRCTraceRandomSample"), randSample);
+        _sample++;
+
         computeCam.Render();
         VRCGraphics.Blit(_rtL0, _rtL0Copy);
 
@@ -180,17 +219,20 @@ public class VRCTraceLightmapBaker : UdonSharpBehaviour
             VRCGraphics.Blit(_rtL1, _rtL1Copy);
         }
 
-        _sample++;
     }
 
     void BakeProbeSample()
     {
+        VRCShader.SetGlobalInteger(VRCShader.PropertyToID("_UdonVRCTraceProbeSample"), _probeSample);
+        int randSample = _probeSampleIndices[_probeSample];
+        VRCShader.SetGlobalInteger(VRCShader.PropertyToID("_UdonVRCTraceProbeRandomSample"), randSample);
+        _probeSample++;
+
         computeProbesCam.Render();
 
-        VRCGraphics.Blit(_rtProbeL0, _rtProbeL0Copy);
-        VRCGraphics.Blit(_rtProbeL1x, _rtProbeL1xCopy);
-        VRCGraphics.Blit(_rtProbeL1y, _rtProbeL1yCopy);
-        VRCGraphics.Blit(_rtProbeL1z, _rtProbeL1zCopy);
+        VRCGraphics.Blit(_rtProbeTex0, _rtProbeTex0Copy);
+        VRCGraphics.Blit(_rtProbeTex1, _rtProbeTex1Copy);
+        VRCGraphics.Blit(_rtProbeTex2, _rtProbeTex2Copy);
     }
 
     void Update()
@@ -199,19 +241,20 @@ public class VRCTraceLightmapBaker : UdonSharpBehaviour
         {
             HandleResetSamples();
         }
-        if (_sample < sampleCount)
+        if (traceLightmap)
         {
-
-            // BakeSample();
-            BakeSample();
-
-            if (probesPositionBuffer)
+            if (_sample < sampleCount)
             {
-                // BakeProbeSample();
-                BakeProbeSample();
+                BakeLightmapSample();
             }
-
         }
 
+        if (traceProbes)
+        {
+            if (_probeSample < probeSampleCount)
+            {
+                BakeProbeSample();
+            }
+        }
     }
 }

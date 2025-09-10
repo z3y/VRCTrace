@@ -2,10 +2,9 @@ Shader "Unlit/VRCTrace Copy Light Volume"
 {
     Properties
     {
-        _BufferL0 ("L0", 2D) = "black" {}
-        _BufferL1x ("L1x", 2D) = "black" {}
-        _BufferL1y ("L1y", 2D) = "black" {}
-        _BufferL1z ("L1z", 2D) = "black" {}
+        _BufferTex0 ("Tex0", 2D) = "black" {}
+        _BufferTex1 ("Tex1", 2D) = "black" {}
+        _BufferTex2 ("Tex2", 2D) = "black" {}
     }
     SubShader
     {
@@ -22,15 +21,14 @@ Shader "Unlit/VRCTrace Copy Light Volume"
             #include "UnityCustomRenderTexture.cginc"
             #include "Packages/red.sim.lightvolumes/Shaders/LightVolumes.cginc"
 
-            Texture2D _BufferL0;
-            Texture2D _BufferL1x;
-            Texture2D _BufferL1y;
-            Texture2D _BufferL1z;
+            Texture2D _BufferTex0;
+            Texture2D _BufferTex1;
+            Texture2D _BufferTex2;
 
             uint2 Get2DCoord(int probeIndex)
             {
                 uint2 wh;
-                _BufferL0.GetDimensions(wh.x, wh.y);
+                _BufferTex0.GetDimensions(wh.x, wh.y);
 
                 uint h = probeIndex / wh.x;
                 uint v = probeIndex % wh.x;
@@ -40,9 +38,6 @@ Shader "Unlit/VRCTrace Copy Light Volume"
 
             float4 frag(v2f_customrendertexture i) : COLOR
             {
-                uint id = 0;
-                uint uvwID = id * 6;
-
                 float3 localUVW = i.localTexcoord.xyz;
                 localUVW.z = frac(localUVW.z * 3);
 
@@ -63,10 +58,14 @@ Shader "Unlit/VRCTrace Copy Light Volume"
 
                 uint2 coord = Get2DCoord(probeIndex);
 
-                float3 L0 = _BufferL0[coord].xyz;
-                float3 L1x = _BufferL1x[coord].xyz;
-                float3 L1y = _BufferL1y[coord].xyz;
-                float3 L1z = _BufferL1z[coord].xyz;
+                float4 tex0 = _BufferTex0[coord];
+                float4 tex1 = _BufferTex0[coord];
+                float4 tex2 = _BufferTex0[coord];
+
+                float3 L0 = float3(tex0.a, tex1.a, tex2.a);
+                float3 L1x = tex0.xyz;
+                float3 L1y = tex1.xyz;
+                float3 L1z = tex2.xyz;
 
                 L0 *= UNITY_PI;
                 L1x *= 2.0 * UNITY_PI / 3.0;

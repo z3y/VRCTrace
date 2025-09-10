@@ -21,11 +21,14 @@ Shader "Unlit/VRCTrace Camera"
             #include "UnityCG.cginc"
             #include "VRCTrace.hlsl"
 
+            // #define _VERTEXTRACE
+
             struct appdata
             {
                 float4 vertex : POSITION;
                 float3 normal : NORMAL;
                 float2 uv : TEXCOORD0;
+                uint id : SV_VertexID;
             };
 
             struct v2f
@@ -33,29 +36,16 @@ Shader "Unlit/VRCTrace Camera"
                 float2 uv : TEXCOORD0;
                 float3 positionWS : TEXCOORD1;
                 float3 normalWS : TEXCOORD2;
+                float3 diffuse : TEXCOORD3;
                 float4 vertex : SV_POSITION;
             };
-
-            v2f vert (appdata v)
-            {
-                v2f o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv = v.uv;
-                o.positionWS = mul(unity_ObjectToWorld, v.vertex).xyz;
-                o.normalWS = UnityObjectToWorldNormal(v.normal);
-                return o;
-            }
 
             float4 _Color;
             float3 _LightPosition;
             float _LightRadius;
 
-            float4 frag (v2f i) : SV_Target
+            float3 TraceDiffuse(float3 P, float3 N, float2 xi)
             {
-                float3 P = i.positionWS;
-                float3 N = i.normalWS;
-
-                float2 xi = GetRand(i.vertex.xy * _Time.y);
 
                 float3 lightPosition = _LightPosition;
                 float lightRadius = _LightRadius;
@@ -129,7 +119,43 @@ Shader "Unlit/VRCTrace Camera"
                     }
                 }
 
-                return float4(directDiffuse + indirectDiffuse, 1);
+                return directDiffuse + indirectDiffuse;
+            }
+
+
+            v2f vert (appdata v)
+            {
+                v2f o;
+                o.vertex = UnityObjectToClipPos(v.vertex);
+                o.uv = v.uv;
+                o.positionWS = mul(unity_ObjectToWorld, v.vertex).xyz;
+                o.normalWS = UnityObjectToWorldNormal(v.normal);
+
+                #ifdef _VERTEXTRACE
+                float2 xi = GetRand(v.id.xx * _Time.y);
+                float3 P = o.positionWS;
+                float3 N = o.normalWS;
+                o.diffuse = TraceDiffuse(P, N, xi) * 0.5;
+                #endif
+
+                return o;
+            }
+
+
+            float4 frag (v2f i) : SV_Target
+            {
+                float3 P = i.positionWS;
+                float3 N = i.normalWS;
+
+                float2 xi = GetRand(i.vertex.xy * _Time.y);
+
+                #ifndef _VERTEXTRACE
+                float3 diffuse = TraceDiffuse(P, N, xi);
+                #else
+                float3 diffuse = i.diffuse;
+                #endif
+
+                return float4(diffuse, 1);
             }
             ENDCG
         }

@@ -57,37 +57,33 @@ Shader "Unlit/VRCTrace Lightprobe"
             Texture2D<float4> _ProbePositionBuffer;
             SamplerState sampler_ProbePositionBuffer;
 
-            int _UdonVRCTraceSampleCount;
-            int _UdonVRCTraceSample;
-            int _UdonVRCTraceRandomSample;
+            int _UdonVRCTraceProbeSampleCount;
+            int _UdonVRCTraceProbeSample;
+            int _UdonVRCTraceProbeRandomSample;
 
             float3 _LightPosition;
             float _LightRadius;
 
             struct Fragout
             {
-                float3 L0 : SV_Target0;
-                float3 L1x : SV_Target1;
-                float3 L1y : SV_Target2;
-                float3 L1z : SV_Target3;
+                float4 Tex0 : SV_Target0;
+                float4 Tex1 : SV_Target1;
+                float4 Tex2 : SV_Target2;
             };
 
-            Texture2D<float4> _UdonVRCTraceProbesL0Copy;
-            SamplerState sampler_UdonVRCTraceProbesL0Copy;
-            Texture2D<float4> _UdonVRCTraceProbesL1xCopy;
-            Texture2D<float4> _UdonVRCTraceProbesL1yCopy;
-            Texture2D<float4> _UdonVRCTraceProbesL1zCopy;
-
+            Texture2D<float4> _UdonVRCTraceProbesTex0Copy;
+            Texture2D<float4> _UdonVRCTraceProbesTex1Copy;
+            Texture2D<float4> _UdonVRCTraceProbesTex2Copy;
+            SamplerState sampler_UdonVRCTraceProbesTex0Copy;
 
 
             Fragout frag (v2f i)
             {
                 float2 uv = i.uv;
                 
-                float3 previousL0 = _UdonVRCTraceProbesL0Copy.SampleLevel(sampler_UdonVRCTraceProbesL0Copy, uv, 0);
-                float3 previousL1x = _UdonVRCTraceProbesL1xCopy.SampleLevel(sampler_UdonVRCTraceProbesL0Copy, uv, 0);
-                float3 previousL1y = _UdonVRCTraceProbesL1yCopy.SampleLevel(sampler_UdonVRCTraceProbesL0Copy, uv, 0);
-                float3 previousL1z = _UdonVRCTraceProbesL1zCopy.SampleLevel(sampler_UdonVRCTraceProbesL0Copy, uv, 0);
+                float4 previousTex0 = _UdonVRCTraceProbesTex0Copy.SampleLevel(sampler_UdonVRCTraceProbesTex0Copy, uv, 0);
+                float4 previousTex1 = _UdonVRCTraceProbesTex1Copy.SampleLevel(sampler_UdonVRCTraceProbesTex0Copy, uv, 0);
+                float4 previousTex2 = _UdonVRCTraceProbesTex2Copy.SampleLevel(sampler_UdonVRCTraceProbesTex0Copy, uv, 0);
 
                 uv.y = 1.0 - uv.y;
 
@@ -98,10 +94,9 @@ Shader "Unlit/VRCTrace Lightprobe"
                 if (positionBuffer.a <= 0)
                 {
                     Fragout Out1;
-                    Out1.L0 = 0;
-                    Out1.L1x = 0;
-                    Out1.L1y = 0;
-                    Out1.L1z = 0;
+                    Out1.Tex0 = 0;
+                    Out1.Tex1 = 0;
+                    Out1.Tex2 = 0;
                     return Out1;
                 }
 
@@ -109,7 +104,7 @@ Shader "Unlit/VRCTrace Lightprobe"
                 // float4 previousRt = _UdonVRCTraceLightmapCopy.SampleLevel(sampler_UdonVRCTraceLightmapPositionBuffer, uv, 0);
                 // float4 previousRt1 = _UdonVRCTraceLightmapL1Copy.SampleLevel(sampler_UdonVRCTraceLightmapPositionBuffer, uv, 0);
 
-                float2 xi = Hammersley(_UdonVRCTraceRandomSample, _UdonVRCTraceSampleCount);
+                float2 xi = Hammersley(_UdonVRCTraceProbeRandomSample, _UdonVRCTraceProbeSampleCount);
                 xi = frac(xi + GetRand(i.vertex.xy));
 
                 float3 lightPosition = _LightPosition;
@@ -214,11 +209,14 @@ Shader "Unlit/VRCTrace Lightprobe"
                 // L1y *= 2.0 * UNITY_PI / 3.0;
                 // L1z *= 2.0 * UNITY_PI / 3.0;
 
+                float4 tex0 = float4(L1x, L0.x);
+                float4 tex1 = float4(L1y, L0.y);
+                float4 tex2 = float4(L1z, L0.z);
+
                 Fragout Out;
-                Out.L0 = float3(previousL0 * _UdonVRCTraceSample + L0) / (_UdonVRCTraceSample + 1);
-                Out.L1x = float3(previousL1x * _UdonVRCTraceSample + L1x) / (_UdonVRCTraceSample + 1);
-                Out.L1y = float3(previousL1y * _UdonVRCTraceSample + L1y) / (_UdonVRCTraceSample + 1);
-                Out.L1z = float3(previousL1z * _UdonVRCTraceSample + L1z) / (_UdonVRCTraceSample + 1);
+                Out.Tex0 = float4(previousTex0 * _UdonVRCTraceProbeSample + tex0) / (_UdonVRCTraceProbeSample + 1);
+                Out.Tex1 = float4(previousTex1 * _UdonVRCTraceProbeSample + tex1) / (_UdonVRCTraceProbeSample + 1);
+                Out.Tex2 = float4(previousTex2 * _UdonVRCTraceProbeSample + tex2) / (_UdonVRCTraceProbeSample + 1);
                 return Out;
             }
             ENDCG
