@@ -120,18 +120,18 @@ void TrianglePointNormal(Intersection intersection, out float3 P, out float3 Ng)
 {
     int tri_index = intersection.prim;
     int2 data_idx = DataIndex(tri_index);
-    float3 v2 = _UdonVRCTraceVertices[data_idx].xyz;
+    float3 v0 = _UdonVRCTraceVertices[data_idx].xyz;
     data_idx.y++;
     float3 v1 = _UdonVRCTraceVertices[data_idx].xyz;
     data_idx.y++;
-    float3 v0 = _UdonVRCTraceVertices[data_idx].xyz;
+    float3 v2 = _UdonVRCTraceVertices[data_idx].xyz;
 
     float u = intersection.u;
     float v = intersection.v;
 
     float w = 1.0 - u - v;
     P = (w * v0 + u * v1 + v * v2);
-    Ng = normalize(cross(v2 - v0, v1 - v0));
+    Ng = normalize(cross(v1 - v0, v2 - v0));
 }
 
 inline float3 VRCTrace_SafeNormalize(float3 inVec)
