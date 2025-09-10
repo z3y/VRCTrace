@@ -19,6 +19,7 @@ public class VRCTraceGI : UdonSharpBehaviour
     public Texture2D probesPositionBuffer;
     public Material probesCopyMat;
     public int probeSampleCount = 64;
+    public CustomRenderTexture probeCopy;
 
     RenderTexture _rtL0;
     RenderTexture _rtL1;
@@ -236,6 +237,8 @@ public class VRCTraceGI : UdonSharpBehaviour
         VRCGraphics.Blit(_rtProbeTex0, _rtProbeTex0Copy);
         VRCGraphics.Blit(_rtProbeTex1, _rtProbeTex1Copy);
         VRCGraphics.Blit(_rtProbeTex2, _rtProbeTex2Copy);
+
+        probeCopy.Update();
     }
 
     void Update()
