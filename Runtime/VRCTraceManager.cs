@@ -44,6 +44,7 @@ namespace VRCTrace
             VRCShader.SetGlobalInteger(VRCShader.PropertyToID("_UdonVRCTraceDataWidth"), verticesBuffer.width);
         }
 
+        // editor only object because U# compiler cant compile custom classes
         object _bvh = null;
 #if UNITY_EDITOR && !COMPILER_UDONSHARP
         private void OnDrawGizmosSelected()

@@ -4,7 +4,7 @@ using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon;
 
-public class VRCTraceLightmapBaker : UdonSharpBehaviour
+public class VRCTraceGI : UdonSharpBehaviour
 {
     public Camera computeCam;
     public Camera computeProbesCam;

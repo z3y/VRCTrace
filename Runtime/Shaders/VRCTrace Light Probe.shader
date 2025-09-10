@@ -1,4 +1,4 @@
-Shader "Unlit/VRCTrace Lightprobe"
+Shader "Unlit/VRCTrace Light Probe"
 {
     Properties
     {
@@ -46,6 +46,8 @@ Shader "Unlit/VRCTrace Lightprobe"
                 o.uv = v.uv.xy;
 
                 // o.uv = v.uv;
+
+                // only show on compute camera
                 float3 objectPosition = UNITY_MATRIX_M._m03_m13_m23;
                 if (distance(_WorldSpaceCameraPos.xyz, objectPosition) > 2)
                 {
@@ -99,10 +101,6 @@ Shader "Unlit/VRCTrace Lightprobe"
                     Out1.Tex2 = 0;
                     return Out1;
                 }
-
-
-                // float4 previousRt = _UdonVRCTraceLightmapCopy.SampleLevel(sampler_UdonVRCTraceLightmapPositionBuffer, uv, 0);
-                // float4 previousRt1 = _UdonVRCTraceLightmapL1Copy.SampleLevel(sampler_UdonVRCTraceLightmapPositionBuffer, uv, 0);
 
                 float2 xi = Hammersley(_UdonVRCTraceProbeRandomSample, _UdonVRCTraceProbeSampleCount);
                 xi = frac(xi + GetRand(i.vertex.xy));
@@ -183,7 +181,7 @@ Shader "Unlit/VRCTrace Lightprobe"
                     [branch]
                     if (cosTheta > 0 && !isBackFace)
                     {
-                        L0_1 = Li * cosTheta * Y0;// * UNITY_PI * 4;
+                        L0_1 = Li * cosTheta * Y0;// * UNITY_PI * 4; // for some reason this makes it look worse
                         L1x_1 = Li * (cosTheta * newDir.x) * Y1;// * UNITY_PI * 4;
                         L1y_1 = Li * (cosTheta * newDir.y) * Y1;// * UNITY_PI * 4;
                         L1z_1 = Li * (cosTheta * newDir.z) * Y1;// * UNITY_PI * 4;
@@ -203,11 +201,6 @@ Shader "Unlit/VRCTrace Lightprobe"
                 L1x += L1x_1;
                 L1y += L1y_1;
                 L1z += L1z_1;
-
-                // L0 *= UNITY_PI;
-                // L1x *= 2.0 * UNITY_PI / 3.0;
-                // L1y *= 2.0 * UNITY_PI / 3.0;
-                // L1z *= 2.0 * UNITY_PI / 3.0;
 
                 float4 tex0 = float4(L1x, L0.x);
                 float4 tex1 = float4(L1y, L0.y);
