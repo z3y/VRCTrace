@@ -22,6 +22,7 @@ Shader "Unlit/VRCTrace Camera"
             #include "VRCTrace.hlsl"
 
             // #define _VERTEXTRACE
+            // #define _REFLECTIONS
 
             struct appdata
             {
@@ -153,6 +154,25 @@ Shader "Unlit/VRCTrace Camera"
                 float3 diffuse = TraceDiffuse(P, N, xi);
                 #else
                 float3 diffuse = i.diffuse;
+                #endif
+
+                #ifdef _REFLECTIONS
+                    float3 viewDir = normalize(_WorldSpaceCameraPos.xyz - P);
+                    float3 reflDir = reflect(-viewDir, N);
+
+                    Ray ray;
+                    ray.D = reflDir;
+                    ray.P = RayOffset(P, ray.D);
+
+                    Intersection intersection;
+                    if (SceneIntersects(ray, intersection))
+                    {
+                        float3 hitP, hitN;
+                        TrianglePointNormal(intersection, hitP, hitN);
+                        hitN = TriangleSmoothNormal(intersection, hitN);
+                        return float4(hitN * 0.5 + 0.5, 1);
+                    }
+                    return 0;
                 #endif
 
                 return float4(diffuse, 1);

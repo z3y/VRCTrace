@@ -157,6 +157,7 @@ float3 TriangleSmoothNormal(Intersection intersection, float3 Ng)
     return all(N == 0) ? Ng : N;
 }
 
+// adapted from https://github.com/SebLague/Ray-Tracing (MIT)
 bool SceneIntersects(Ray ray, out Intersection intersection)
 {
     int stack[32];
@@ -283,6 +284,7 @@ float3 RandomDirectionInHemisphere(float3 normal, float2 rand)
     // Transform to world space
     return tangent * localDir.x + bitangent * localDir.y + normal * localDir.z;
 }
+
 float2 Hammersley(uint i, uint N)
 {
     // radical inverse (Van der Corput) in base 2
