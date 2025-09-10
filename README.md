@@ -25,3 +25,5 @@ if (SceneIntersects(ray, intersection))
     TrianglePointNormal(intersection, hitP, hitN);
 }
 ```
+
+Adapted from Sebastian Lague's ray tracing tutorials
