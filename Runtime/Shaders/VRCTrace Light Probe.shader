@@ -137,7 +137,7 @@ Shader "Unlit/VRCTrace Light Probe"
 
 
                 Intersection isect;
-                if (TraceRay(ray, isect))
+                if (SceneIntersects(ray, isect))
                 {
                     if (isect.t < length(positionToLight))
                     {
@@ -158,7 +158,7 @@ Shader "Unlit/VRCTrace Light Probe"
                 float3 L1y_1 = 0;
                 float3 L1z_1 = 0;
 
-                if (TraceRay(ray, isect))
+                if (SceneIntersects(ray, isect))
                 {
                     float3 hitP, hitN;
                     TrianglePointNormal(isect, hitP, hitN);
@@ -186,7 +186,7 @@ Shader "Unlit/VRCTrace Light Probe"
                         L1y_1 = Li * (cosTheta * newDir.y) * Y1;// * UNITY_PI * 4;
                         L1z_1 = Li * (cosTheta * newDir.z) * Y1;// * UNITY_PI * 4;
 
-                        if (TraceRay(ray, isect)) {
+                        if (SceneIntersects(ray, isect)) {
                             if (isect.t < length(positionToLight))
                             {
                                 L0_1 = 0;

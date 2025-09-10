@@ -150,7 +150,7 @@ Shader "Unlit/VRCTrace Lightmap"
 
 
                 Intersection isect;
-                if (TraceRay(ray, isect))
+                if (SceneIntersects(ray, isect))
                 {
                     if (isect.t < length(positionToLight))
                     {
@@ -173,7 +173,7 @@ Shader "Unlit/VRCTrace Lightmap"
                 float3 L1y_1 = 0;
                 float3 L1z_1 = 0;
 
-                if (TraceRay(ray, isect))
+                if (SceneIntersects(ray, isect))
                 {
                     float3 hitP, hitN;
                     TrianglePointNormal(isect, hitP, hitN);
@@ -205,7 +205,7 @@ Shader "Unlit/VRCTrace Lightmap"
                         L1y_1 = Li * (cosTheta * newDir.y) * Y1;
                         L1z_1 = Li * (cosTheta * newDir.z) * Y1;
 
-                        if (TraceRay(ray, isect)) {
+                        if (SceneIntersects(ray, isect)) {
                             if (isect.t < length(positionToLight))
                             {
                                 indirectDiffuse = 0;

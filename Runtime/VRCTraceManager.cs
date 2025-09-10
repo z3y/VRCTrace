@@ -116,7 +116,7 @@ namespace VRCTrace
                     objectIds.Add(objectId);
 
                     var n = f.transform.TransformVector(norm[i]);
-                    normals.Add(n);
+                    normals.Add(n.normalized);
                 }
 
                 vert_offset += verts.Length;

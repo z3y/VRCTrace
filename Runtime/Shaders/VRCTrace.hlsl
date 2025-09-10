@@ -48,6 +48,7 @@ int2 BoundsIndex(int index)
     return int2(v, h);
 }
 
+// for some reason this is not precise
 #if 0
 // "A Fast and Robust Method for Avoiding Self-Intersection"
 // Normal points outward for rays exiting the surface, else is flipped.
@@ -139,7 +140,6 @@ inline float3 VRCTrace_SafeNormalize(float3 inVec)
     return inVec * rsqrt(dp3);
 }
 
-// figure out whats wrong here
 float3 TriangleSmoothNormal(Intersection intersection, float3 Ng)
 {
     uint tri_index = intersection.prim;
@@ -157,7 +157,7 @@ float3 TriangleSmoothNormal(Intersection intersection, float3 Ng)
     return all(N == 0) ? Ng : N;
 }
 
-bool TraceRay(Ray ray, out Intersection intersection)
+bool SceneIntersects(Ray ray, out Intersection intersection)
 {
     int stack[32];
     int stackIndex = 0;
