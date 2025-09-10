@@ -73,9 +73,9 @@ Shader "Unlit/VRCTrace Copy Light Volume"
                 L1y *= 2.0 * UNITY_PI / 3.0;
                 L1z *= 2.0 * UNITY_PI / 3.0;
 
-                float3 L1r = float3(L1x.x, L1y.x, L1z.x);
-                float3 L1g = float3(L1x.y, L1y.y, L1z.y);
-                float3 L1b = float3(L1x.z, L1y.z, L1z.z);
+                float3 L1r = float3(L1x.x, L1y.x, L1z.x) * 0.565;
+                float3 L1g = float3(L1x.y, L1y.y, L1z.y) * 0.565;
+                float3 L1b = float3(L1x.z, L1y.z, L1z.z) * 0.565;
 
 
                 // if (slice >= resolution.z * 2) // texture 0

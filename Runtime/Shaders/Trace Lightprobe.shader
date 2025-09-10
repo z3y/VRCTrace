@@ -209,10 +209,10 @@ Shader "Unlit/VRCTrace Lightprobe"
                 L1y += L1y_1;
                 L1z += L1z_1;
 
-                L0 *= UNITY_PI;
-                L1x *= 2.0 * UNITY_PI / 3.0;
-                L1y *= 2.0 * UNITY_PI / 3.0;
-                L1z *= 2.0 * UNITY_PI / 3.0;
+                // L0 *= UNITY_PI;
+                // L1x *= 2.0 * UNITY_PI / 3.0;
+                // L1y *= 2.0 * UNITY_PI / 3.0;
+                // L1z *= 2.0 * UNITY_PI / 3.0;
 
                 Fragout Out;
                 Out.L0 = float3(previousL0 * _UdonVRCTraceSample + L0) / (_UdonVRCTraceSample + 1);
