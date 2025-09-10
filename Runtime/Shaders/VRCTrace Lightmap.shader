@@ -89,6 +89,8 @@ Shader "Unlit/VRCTrace Lightmap"
                 float3 P = positionBuffer.rgb;
                 float3 N = _UdonVRCTraceLightmapNormalBuffer.SampleLevel(sampler_UdonVRCTraceLightmapPositionBuffer, uv, 0);
 
+                N = normalize(N);
+
                 [branch]
                 if (positionBuffer.a <= 0)
                 {

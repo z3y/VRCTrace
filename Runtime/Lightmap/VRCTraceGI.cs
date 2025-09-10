@@ -6,33 +6,36 @@ using VRC.Udon;
 
 public class VRCTraceGI : UdonSharpBehaviour
 {
+    [Header("Lightmap")]
+    public bool traceLightmap = false;
     public Camera computeCam;
+    public int lightmapResolution = 512;
+    public int sampleCount = 512;
+    public bool monoSH;
+
+    [Header("Light Probes")]
+    public bool traceProbes = false;
     public Camera computeProbesCam;
     public Texture2D probesPositionBuffer;
     public Material probesCopyMat;
-    public int lightmapResolution = 512;
+    public int probeSampleCount = 64;
 
     RenderTexture _rtL0;
     RenderTexture _rtL1;
     RenderTexture _rtL0Copy;
     RenderTexture _rtL1Copy;
     int _sample = 0;
-    public int sampleCount = 512;
 
     int _probeSample = 0;
-    public int probeSampleCount = 64;
 
     int[] _sampleIndices;
     int[] _probeSampleIndices;
 
-    public bool monoSH;
 
     RenderTexture _rtProbeTex0, _rtProbeTex0Copy;
     RenderTexture _rtProbeTex1, _rtProbeTex1Copy;
     RenderTexture _rtProbeTex2, _rtProbeTex2Copy;
 
-    public bool traceLightmap = false;
-    public bool traceProbes = false;
 
     void Start()
     {
