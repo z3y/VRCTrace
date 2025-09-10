@@ -41,15 +41,15 @@ Shader "Unlit/VRCTrace Copy Light Volume"
                 float3 localUVW = i.localTexcoord.xyz;
                 localUVW.z = frac(localUVW.z * 3);
 
-                int3 resolution = int3(38, 12, 111 / 3);
+                int3 resolution = _CustomRenderTextureInfo.xyz;
+                resolution.z /= 3;
 
                 int3 pixelCoord = localUVW * resolution;
-
                 int slice = _CustomRenderTexture3DSlice;
 
-
-                resolution -= 2;
+                resolution -= 2; // padding
                 pixelCoord = clamp(pixelCoord, 1, resolution-1);
+
                 uint width = resolution.x;
                 uint height = resolution.y;
                 uint probeIndex = pixelCoord.x + pixelCoord.y * width + pixelCoord.z * (width * height);
@@ -76,19 +76,6 @@ Shader "Unlit/VRCTrace Copy Light Volume"
                 float3 L1g = float3(L1x.y, L1y.y, L1z.y) * 0.565;
                 float3 L1b = float3(L1x.z, L1y.z, L1z.z) * 0.565;
 
-
-                // if (slice >= resolution.z * 2) // texture 0
-                // {
-                //     return float4(L0.xyz, L1r.z);
-                // }
-                // else if (slice <= resolution.z) // texture 1
-                // {
-                //     return float4(L1r.y, L1g.y, L1b.y, L1g.z);
-                // }
-                // else  // texture 2
-                // {
-                //     return float4(L1r.x, L1g.x, L1b.x, L1b.z);
-                // }
 
                 if (slice >= resolution.z * 2) // texture 2
                 {
