@@ -6,6 +6,9 @@ Texture2D<float4> _UdonVRCTraceVertices;
 Texture2D<float4> _UdonVRCTraceNormals;
 Texture2D<float4> _UdonVRCTraceBounds;
 Texture2D<float4> _UdonVRCTraceUVs;
+Texture2D _UdonVRCTraceCombinedAtlas;
+TextureCube _UdonVRCTraceSkybox;
+SamplerState sampler_UdonVRCTraceSkybox;
 
 uint _UdonVRCTraceBoundsWidth;
 uint _UdonVRCTraceDataWidth;

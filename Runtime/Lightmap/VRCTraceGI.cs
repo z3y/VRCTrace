@@ -32,6 +32,7 @@ public class VRCTraceGI : UdonSharpBehaviour
     int[] _sampleIndices;
     int[] _probeSampleIndices;
 
+    public int BakedSamples => _sample;
 
     RenderTexture _rtProbeTex0, _rtProbeTex0Copy;
     RenderTexture _rtProbeTex1, _rtProbeTex1Copy;

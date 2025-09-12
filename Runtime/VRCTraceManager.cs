@@ -25,7 +25,16 @@ namespace VRCTrace
         public Texture2D normalsBuffer;
         public Texture2D uvsBuffer;
 
+        public Texture2D combinedAtlas;
+        public Texture2D lightmap;
+        public Cubemap skybox;
+
         void Start()
+        {
+            SetGlobals();
+        }
+
+        void OnValidate()
         {
             SetGlobals();
         }
@@ -44,6 +53,16 @@ namespace VRCTrace
 
             VRCShader.SetGlobalInteger(VRCShader.PropertyToID("_UdonVRCTraceBoundsWidth"), boundsBuffer.width);
             VRCShader.SetGlobalInteger(VRCShader.PropertyToID("_UdonVRCTraceDataWidth"), verticesBuffer.width);
+
+            if (combinedAtlas)
+            {
+                VRCShader.SetGlobalTexture(VRCShader.PropertyToID("_UdonVRCTraceCombinedAtlas"), combinedAtlas);
+            }
+
+            if (skybox)
+            {
+                VRCShader.SetGlobalTexture(VRCShader.PropertyToID("_UdonVRCTraceSkybox"), skybox);
+            }
         }
 
         // editor only object because U# compiler cant compile custom classes
@@ -104,6 +123,8 @@ namespace VRCTrace
                 {
                     uv = m.HasVertexAttribute(VertexAttribute.TexCoord1) ? m.uv2 : m.uv;
                 }
+
+                // uvs need to be transformed here when using lightmap scale and offset
 
                 for (int i = 0; i < tris.Length;)
                 {
@@ -233,13 +254,13 @@ namespace VRCTrace
             SetGlobals();
         }
 
-        public static List<MeshRenderer> GetStaticRenderers()
+        public List<MeshRenderer> GetStaticRenderers()
         {
             Scene scene = SceneManager.GetActiveScene();
             var rootGameObjects = scene.GetRootGameObjects();
             return GetStaticRenderers(rootGameObjects);
         }
-        public static List<MeshRenderer> GetStaticRenderers(GameObject[] rootObjs)
+        public List<MeshRenderer> GetStaticRenderers(GameObject[] rootObjs)
         {
             var infoMsg = new StringBuilder();
 
@@ -343,6 +364,16 @@ namespace VRCTrace
             {
                 var manager = target as VRCTraceManager;
                 manager.GenerateBuffers();
+            }
+
+            if (GUILayout.Button("Generate Combined Atlas")) // only albedo for now
+            {
+                var manager = target as VRCTraceManager;
+                using var meta = new MetaTexture(manager.lightmap.width);
+                var atlas = meta.CreateCombinedAtlas(manager.GetStaticRenderers().ToArray(), manager.lightmap);
+                manager.combinedAtlas = atlas;
+                manager.SetGlobals();
+
             }
 
             base.OnInspectorGUI();
