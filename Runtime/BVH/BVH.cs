@@ -14,7 +14,7 @@ public class BVH
 
     readonly BVHTriangle[] AllTriangles;
 
-    public BVH(Vector3[] verts, int[] indices, Vector3[] normals, int[] objectIds)
+    public BVH(Vector3[] verts, int[] indices, Vector3[] normals, Vector2[] uvs, int[] objectIds)
     {
         // Start recording stats
         var sw = System.Diagnostics.Stopwatch.StartNew();
@@ -50,9 +50,14 @@ public class BVH
             Vector3 norm_a = normals[indices[buildTri.Index + 0]];
             Vector3 norm_b = normals[indices[buildTri.Index + 1]];
             Vector3 norm_c = normals[indices[buildTri.Index + 2]];
+
+            Vector3 uv_a = uvs[indices[buildTri.Index + 0]];
+            Vector3 uv_b = uvs[indices[buildTri.Index + 1]];
+            Vector3 uv_c = uvs[indices[buildTri.Index + 2]];
+
             int objId = objectIds[indices[buildTri.Index + 0]];
 
-            allTris[i] = new Triangle(a, b, c, norm_a, norm_b, norm_c, objId);
+            allTris[i] = new Triangle(a, b, c, norm_a, norm_b, norm_c, uv_a, uv_b, uv_c, objId);
         }
 
         // Finish recording stats

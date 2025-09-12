@@ -7,6 +7,7 @@ Shader "Unlit/VRCTrace Camera"
         _LightPosition ("Light Position", Vector) = (0,1,0,0)
         _LightRadius ("Light Position", Float) = 0.1
         _Roughness("Roughness", Range(0, 1)) = 0
+        [IntRange] _Resolution("Resolution", Range(1,4)) = 1
     }
     SubShader
     {
@@ -46,6 +47,7 @@ Shader "Unlit/VRCTrace Camera"
             float3 _LightPosition;
             float _LightRadius;
             float _Roughness;
+            int _Resolution;
 
             float3 TraceDiffuse(float3 P, float3 N, float2 xi)
             {
@@ -152,7 +154,10 @@ Shader "Unlit/VRCTrace Camera"
                 float3 P = i.positionWS;
                 float3 N = i.normalWS;
 
-                float2 xi = GetRand(i.vertex.xy * _Time.y);
+                float2 vpos = floor(i.vertex.xy / _Resolution) * _Resolution;
+                if (_Resolution <= 1) vpos = i.vertex.xy;
+
+                float2 xi = GetRand(vpos.xy * _Time.y);
 
                 #ifndef _VERTEXTRACE
                 float3 diffuse = TraceDiffuse(P, N, xi);

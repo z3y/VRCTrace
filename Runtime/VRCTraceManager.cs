@@ -23,6 +23,7 @@ namespace VRCTrace
         public Texture2D boundsBuffer;
         public Texture2D verticesBuffer;
         public Texture2D normalsBuffer;
+        public Texture2D uvsBuffer;
 
         void Start()
         {
@@ -39,6 +40,7 @@ namespace VRCTrace
             VRCShader.SetGlobalTexture(VRCShader.PropertyToID("_UdonVRCTraceBounds"), boundsBuffer);
             VRCShader.SetGlobalTexture(VRCShader.PropertyToID("_UdonVRCTraceVertices"), verticesBuffer);
             VRCShader.SetGlobalTexture(VRCShader.PropertyToID("_UdonVRCTraceNormals"), normalsBuffer);
+            VRCShader.SetGlobalTexture(VRCShader.PropertyToID("_UdonVRCTraceUVs"), uvsBuffer);
 
             VRCShader.SetGlobalInteger(VRCShader.PropertyToID("_UdonVRCTraceBoundsWidth"), boundsBuffer.width);
             VRCShader.SetGlobalInteger(VRCShader.PropertyToID("_UdonVRCTraceDataWidth"), verticesBuffer.width);
@@ -74,6 +76,7 @@ namespace VRCTrace
 
             //List<Vector3Int> triangles = new List<Vector3Int>();
             List<Vector3> vertices = new List<Vector3>();
+            List<Vector2> uvs = new List<Vector2>();
             List<int> indices = new List<int>();
             List<Vector3> normals = new List<Vector3>();
             List<int> objectIds = new List<int>();
@@ -92,6 +95,15 @@ namespace VRCTrace
                 var tris = m.triangles;
                 var verts = m.vertices;
                 var norm = m.normals;
+                Vector2[] uv;
+                if (r.enlightenVertexStream)
+                {
+                    uv = r.enlightenVertexStream.uv2;
+                }
+                else
+                {
+                    uv = m.HasVertexAttribute(VertexAttribute.TexCoord1) ? m.uv2 : m.uv;
+                }
 
                 for (int i = 0; i < tris.Length;)
                 {
@@ -117,6 +129,7 @@ namespace VRCTrace
 
                     var n = f.transform.TransformVector(norm[i]);
                     normals.Add(n.normalized);
+                    uvs.Add(uv[i]);
                 }
 
                 vert_offset += verts.Length;
@@ -131,43 +144,50 @@ namespace VRCTrace
                 objectId++;
             }
 
-            _bvh = new BVH(vertices.ToArray(), indices.ToArray(), normals.ToArray(), objectIds.ToArray());
+            _bvh = new BVH(vertices.ToArray(), indices.ToArray(), normals.ToArray(), uvs.ToArray(), objectIds.ToArray());
 
             var bvh_tris = (_bvh as BVH).GetTriangles();
             var nodes = (_bvh as BVH).GetNodes();
 
 
-            int tri_verts_buffer_x = Mathf.NextPowerOfTwo((int)math.ceil(math.sqrt(bvh_tris.Length)));
+            int vertexBufferWidth = Mathf.NextPowerOfTwo((int)math.ceil(math.sqrt(bvh_tris.Length)));
 
-            var tri_verts_buffer = new Texture2D(tri_verts_buffer_x, tri_verts_buffer_x * 3, TextureFormat.RGBAFloat, false);
-            var tri_normals_buffer = new Texture2D(tri_verts_buffer_x, tri_verts_buffer_x * 3, TextureFormat.RGBAFloat, false);
-
-
-            int bounds_buffer_x = Mathf.NextPowerOfTwo((int)math.ceil(math.sqrt(nodes.Length)));
-            var bounds_buffer = new Texture2D(bounds_buffer_x, bounds_buffer_x * 2, TextureFormat.RGBAFloat, false);
+            var triangleBuffer = new Texture2D(vertexBufferWidth, vertexBufferWidth * 3, TextureFormat.RGBAFloat, false);
+            var normalsBuffer = new Texture2D(vertexBufferWidth, vertexBufferWidth * 3, TextureFormat.RGBAFloat, false);
+            var uvsBuffer = new Texture2D(vertexBufferWidth, vertexBufferWidth * 3, TextureFormat.RGBAFloat, false);
 
 
-            tri_verts_buffer.wrapMode = TextureWrapMode.Clamp;
-            tri_normals_buffer.wrapMode = TextureWrapMode.Clamp;
-            bounds_buffer.wrapMode = TextureWrapMode.Clamp;
+            int boundsBufferWidth = Mathf.NextPowerOfTwo((int)math.ceil(math.sqrt(nodes.Length)));
+            var boundsBuffer = new Texture2D(boundsBufferWidth, boundsBufferWidth * 2, TextureFormat.RGBAFloat, false);
 
-            tri_verts_buffer.filterMode = FilterMode.Point;
-            tri_normals_buffer.filterMode = FilterMode.Point;
-            bounds_buffer.filterMode = FilterMode.Point;
+
+            triangleBuffer.wrapMode = TextureWrapMode.Clamp;
+            normalsBuffer.wrapMode = TextureWrapMode.Clamp;
+            boundsBuffer.wrapMode = TextureWrapMode.Clamp;
+            uvsBuffer.wrapMode = TextureWrapMode.Clamp;
+
+            triangleBuffer.filterMode = FilterMode.Point;
+            normalsBuffer.filterMode = FilterMode.Point;
+            boundsBuffer.filterMode = FilterMode.Point;
+            uvsBuffer.filterMode = FilterMode.Point;
 
             for (int i = 0; i < bvh_tris.Length; i++)
             {
                 var tri = bvh_tris[i];
 
-                int y = (i / tri_verts_buffer_x) * 3;
-                int x = i % tri_verts_buffer_x;
-                tri_verts_buffer.SetPixel(x, y + 0, new Color(tri.PosA.x, tri.PosA.y, tri.PosA.z, math.asfloat(tri.ObjectId)));
-                tri_verts_buffer.SetPixel(x, y + 1, new Color(tri.PosB.x, tri.PosB.y, tri.PosB.z, math.asfloat(tri.ObjectId)));
-                tri_verts_buffer.SetPixel(x, y + 2, new Color(tri.PosC.x, tri.PosC.y, tri.PosC.z, math.asfloat(tri.ObjectId)));
+                int y = (i / vertexBufferWidth) * 3;
+                int x = i % vertexBufferWidth;
+                triangleBuffer.SetPixel(x, y + 0, new Color(tri.PosA.x, tri.PosA.y, tri.PosA.z, math.asfloat(tri.ObjectId)));
+                triangleBuffer.SetPixel(x, y + 1, new Color(tri.PosB.x, tri.PosB.y, tri.PosB.z, math.asfloat(tri.ObjectId))); // w unused
+                triangleBuffer.SetPixel(x, y + 2, new Color(tri.PosC.x, tri.PosC.y, tri.PosC.z, math.asfloat(tri.ObjectId))); // w unused
 
-                tri_normals_buffer.SetPixel(x, y + 0, new Color(tri.NormalA.x, tri.NormalA.y, tri.NormalA.z, math.asfloat(tri.ObjectId)));
-                tri_normals_buffer.SetPixel(x, y + 1, new Color(tri.NormalB.x, tri.NormalB.y, tri.NormalB.z, math.asfloat(tri.ObjectId)));
-                tri_normals_buffer.SetPixel(x, y + 2, new Color(tri.NormalC.x, tri.NormalC.y, tri.NormalC.z, math.asfloat(tri.ObjectId)));
+                normalsBuffer.SetPixel(x, y + 0, new Color(tri.NormalA.x, tri.NormalA.y, tri.NormalA.z, math.asfloat(tri.ObjectId))); // w unused
+                normalsBuffer.SetPixel(x, y + 1, new Color(tri.NormalB.x, tri.NormalB.y, tri.NormalB.z, math.asfloat(tri.ObjectId))); // w unused
+                normalsBuffer.SetPixel(x, y + 2, new Color(tri.NormalC.x, tri.NormalC.y, tri.NormalC.z, math.asfloat(tri.ObjectId))); // w unused
+
+                uvsBuffer.SetPixel(x, y + 0, new Color(tri.UvA.x, tri.UvA.y, 0, 0)); // zw unused
+                uvsBuffer.SetPixel(x, y + 1, new Color(tri.UvB.x, tri.UvB.y, 0, 0)); // zw unused
+                uvsBuffer.SetPixel(x, y + 2, new Color(tri.UvC.x, tri.UvC.y, 0, 0)); // zw unused
             }
 
 
@@ -180,11 +200,11 @@ namespace VRCTrace
                 c = n.BoundsMax;
                 var b1 = new Color(c.x, c.y, c.z, math.asfloat(n.TriangleCount));
 
-                int y = (i / bounds_buffer_x) * 2;
-                int x = i % bounds_buffer_x;
+                int y = (i / boundsBufferWidth) * 2;
+                int x = i % boundsBufferWidth;
 
-                bounds_buffer.SetPixel(x, y + 0, b0);
-                bounds_buffer.SetPixel(x, y + 1, b1);
+                boundsBuffer.SetPixel(x, y + 0, b0);
+                boundsBuffer.SetPixel(x, y + 1, b1);
             }
 
             string sceneFolder = Path.GetDirectoryName(SceneManager.GetActiveScene().path);
@@ -192,18 +212,22 @@ namespace VRCTrace
             string vertPath = Path.Combine(sceneFolder, "VRCTraceVertices.asset");
             string normPath = Path.Combine(sceneFolder, "VRCTraceNormals.asset");
             string boundPath = Path.Combine(sceneFolder, "VRCTraceBounds.asset");
+            string uvsPath = Path.Combine(sceneFolder, "VRCTraceUVs.asset");
 
-            AssetDatabase.CreateAsset(tri_verts_buffer, vertPath);
-            AssetDatabase.CreateAsset(tri_normals_buffer, normPath);
-            AssetDatabase.CreateAsset(bounds_buffer, boundPath);
+            AssetDatabase.CreateAsset(triangleBuffer, vertPath);
+            AssetDatabase.CreateAsset(normalsBuffer, normPath);
+            AssetDatabase.CreateAsset(uvsBuffer, uvsPath);
+            AssetDatabase.CreateAsset(boundsBuffer, boundPath);
 
             AssetDatabase.ImportAsset(vertPath);
             AssetDatabase.ImportAsset(normPath);
             AssetDatabase.ImportAsset(boundPath);
+            AssetDatabase.ImportAsset(uvsPath);
 
-            boundsBuffer = AssetDatabase.LoadAssetAtPath<Texture2D>(boundPath);
+            this.boundsBuffer = AssetDatabase.LoadAssetAtPath<Texture2D>(boundPath);
             verticesBuffer = AssetDatabase.LoadAssetAtPath<Texture2D>(vertPath);
-            normalsBuffer = AssetDatabase.LoadAssetAtPath<Texture2D>(normPath);
+            this.normalsBuffer = AssetDatabase.LoadAssetAtPath<Texture2D>(normPath);
+            this.uvsBuffer = AssetDatabase.LoadAssetAtPath<Texture2D>(uvsPath);
 
             EditorUtility.SetDirty(this);
             SetGlobals();

@@ -1,8 +1,11 @@
 #pragma once
 
+#define VRCTRACE_PI 3.14159265359
+
 Texture2D<float4> _UdonVRCTraceVertices;
 Texture2D<float4> _UdonVRCTraceNormals;
 Texture2D<float4> _UdonVRCTraceBounds;
+Texture2D<float4> _UdonVRCTraceUVs;
 
 uint _UdonVRCTraceBoundsWidth;
 uint _UdonVRCTraceDataWidth;
@@ -157,6 +160,23 @@ float3 TriangleSmoothNormal(Intersection intersection, float3 Ng)
     return all(N == 0) ? Ng : N;
 }
 
+float2 TriangleUV(Intersection intersection)
+{
+    uint tri_index = intersection.prim;
+    int2 data_idx = DataIndex(tri_index);
+    float2 n0 = _UdonVRCTraceUVs[data_idx].xy;
+    data_idx.y++;
+    float2 n1 = _UdonVRCTraceUVs[data_idx].xy;
+    data_idx.y++;
+    float2 n2 = _UdonVRCTraceUVs[data_idx].xy;
+
+    float u = intersection.u;
+    float v = intersection.v;
+
+    float2 uv = float2((1.0 - u - v) * n0 + u * n1 + v * n2);
+    return uv;
+}
+
 // adapted from https://github.com/SebLague/Ray-Tracing (MIT)
 bool SceneIntersects(Ray ray, out Intersection intersection)
 {
@@ -304,7 +324,7 @@ float3 RandomPointOnSphere(float3 center, float radius, float2 xi)
     // xi ∈ [0,1]^2 (stratified random sample, e.g. Hammersley)
     float z = 1.0 - 2.0 * xi.x;
     float r = sqrt(max(0.0, 1.0 - z*z));
-    float phi = 2.0 * UNITY_PI * xi.y;
+    float phi = 2.0 * VRCTRACE_PI * xi.y;
 
     float3 dir = float3(r * cos(phi), r * sin(phi), z);
     return center + dir * radius;
@@ -315,7 +335,7 @@ float3 RandomDirection(float2 xi)
     // xi ∈ [0,1]^2 (stratified random sample, e.g. Hammersley)
     float z = 1.0 - 2.0 * xi.x;
     float r = sqrt(max(0.0, 1.0 - z*z));
-    float phi = 2.0 * UNITY_PI * xi.y;
+    float phi = 2.0 * VRCTRACE_PI * xi.y;
 
     float3 dir = float3(r * cos(phi), r * sin(phi), z);
     return dir;
