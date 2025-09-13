@@ -61,7 +61,7 @@ namespace VRCTrace
 
             Graphics.Blit(Texture2D.blackTexture, _rtFinal, _combineMat, 0);
 
-            var format = TextureFormat.ARGB32;
+            var format = TextureFormat.RGBAFloat;
             var tex = new Texture2D(_rtFinal.width, _rtFinal.height, format, false, true);
 
             RenderTexture.active = _rtFinal;
@@ -70,8 +70,8 @@ namespace VRCTrace
             RenderTexture.active = null;
 
 
-            var bytes = tex.EncodeToTGA();
-            string path = Path.Combine(sceneFolder, "VRCTraceCombinedAtlas.tga");
+            var bytes = tex.EncodeToEXR();
+            string path = Path.Combine(sceneFolder, "VRCTraceCombinedAtlas.exr");
             File.WriteAllBytes(path, bytes);
             AssetDatabase.ImportAsset(path);
 
