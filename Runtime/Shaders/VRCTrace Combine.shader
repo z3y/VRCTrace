@@ -51,10 +51,6 @@ Shader "Hidden/VRCTrace/Combine"
                 float3 albedo = tex2D(_Albedo, i.uv);
                 i.uv.y = 1.0 - i.uv.y;
                 float3 emission = tex2D(_Emission, i.uv);
-
-                emission.r = LinearToGammaSpaceExact(emission.r);
-                emission.g = LinearToGammaSpaceExact(emission.g);
-                emission.b = LinearToGammaSpaceExact(emission.b);
                 
                 float4 col = float4(albedo * lm + emission, 1);
                 return col;
