@@ -4,7 +4,7 @@ Software GPU Ray Tracing for VRChat
 
 ### How to use
 
-Add VRCTraceManager to a gameobject and generate buffers to create a BVH for static objects in the scene
+Add VRCTraceManager to a gameobject and press Generate Buffers to create a BVH for static objects in the scene.
 
 ### Example Shader
 
@@ -15,8 +15,8 @@ Add VRCTraceManager to a gameobject and generate buffers to create a BVH for sta
 ...
 
 Ray ray;
-ray.D = N;
-ray.P = RayOffset(P, N);
+ray.D = rayDirection;
+ray.P = RayOffset(positionWS, normalWS);
 
 Intersection intersection;
 if (SceneIntersects(ray, intersection))
@@ -26,4 +26,11 @@ if (SceneIntersects(ray, intersection))
 }
 ```
 
-Adapted from Sebastian Lague's ray tracing tutorials
+### Raytraced Reflections
+
+- Requires one baked lightmap referenced on the VRCTraceManager and a skybox cubemap for miss
+- Press Generate Combined Atlas
+- This will create a new combined texture using the meta pass (lightmap * albedo + emission)
+- Shaders can then sample this atlas using hit UVs for the reflection
+
+Adapted from Sebastian Lague's ray tracing tutorials.
