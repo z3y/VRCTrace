@@ -65,7 +65,7 @@ Shader "Unlit/VRCTrace Camera"
 
                 Ray ray;
                 ray.D = L;
-                ray.P = RayOffset(P, ray.D);
+                ray.P = RayOffset(P, N);
 
 
                 float3 color = 1;
@@ -88,7 +88,7 @@ Shader "Unlit/VRCTrace Camera"
                 float3 newDir = lerp(reflDir, RandomDirectionInHemisphere(N, xi), _Roughness * _Roughness);
 
                 ray.D = newDir;
-                ray.P = RayOffset(P, ray.D);
+                ray.P = RayOffset(P, N);
 
                 float3 indirectDiffuse = 0;
 
@@ -106,7 +106,7 @@ Shader "Unlit/VRCTrace Camera"
                     attenuation = 1.0 / dot(positionToLight, positionToLight);
 
                     ray.D = L;
-                    ray.P = RayOffset(hitP, ray.D);
+                    ray.P = RayOffset(hitP, hitN);
 
                     diffuseColor = isect.object == 9 ? float3(0,1,0) : diffuseColor;
 

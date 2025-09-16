@@ -151,7 +151,7 @@ Shader "Unlit/VRCTrace Light Probe"
                 float3 newDir = RandomDirection(xi);
 
                 ray.D = newDir;
-                ray.P = RayOffset(P, ray.D);
+                ray.P = RayOffset(P, N);
 
                 float3 L0_1 = 0;
                 float3 L1x_1 = 0;
@@ -171,7 +171,7 @@ Shader "Unlit/VRCTrace Light Probe"
                     attenuation = 1.0 / dot(positionToLight, positionToLight);
 
                     ray.D = L;
-                    ray.P = RayOffset(hitP, ray.D);
+                    ray.P = RayOffset(hitP, hitN);
 
                     float3 diffuseColor = isect.object == 9 ? float3(0,1,0) : 1;
 

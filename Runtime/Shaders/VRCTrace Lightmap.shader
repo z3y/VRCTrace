@@ -134,7 +134,7 @@ Shader "Unlit/VRCTrace Lightmap"
 
                 Ray ray;
                 ray.D = L;
-                ray.P = RayOffset(P, ray.D);
+                ray.P = RayOffset(P, N);
 
 
                 float3 color = 1;
@@ -165,7 +165,7 @@ Shader "Unlit/VRCTrace Lightmap"
                 float3 newDir = RandomDirectionInHemisphere(N, xi);
 
                 ray.D = newDir;
-                ray.P = RayOffset(P, ray.D);
+                ray.P = RayOffset(P, N);
 
                 float3 indirectDiffuse = 0;
                 float3 L0_1 = 0;
@@ -186,7 +186,7 @@ Shader "Unlit/VRCTrace Lightmap"
                     attenuation = 1.0 / dot(positionToLight, positionToLight);
 
                     ray.D = L;
-                    ray.P = RayOffset(hitP, ray.D);
+                    ray.P = RayOffset(hitP, hitN);
 
                     diffuseColor = isect.object == 9 ? float3(0,1,0) : diffuseColor;
 

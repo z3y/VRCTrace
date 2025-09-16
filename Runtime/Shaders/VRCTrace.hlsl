@@ -54,8 +54,8 @@ int2 BoundsIndex(int index)
     return int2(v, h);
 }
 
-// for some reason this is not precise
-#if 0
+// make sure to use the normal and not the ray direction
+#if 1
 // "A Fast and Robust Method for Avoiding Self-Intersection"
 // Normal points outward for rays exiting the surface, else is flipped.
 float3 RayOffset(float3 p, float3 n)
