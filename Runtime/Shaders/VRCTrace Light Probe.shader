@@ -151,7 +151,7 @@ Shader "Unlit/VRCTrace Light Probe"
                 float3 newDir = RandomDirection(xi);
 
                 ray.D = newDir;
-                ray.P = RayOffset(P, N);
+                ray.P = P;
 
                 float3 L0_1 = 0;
                 float3 L1x_1 = 0;
