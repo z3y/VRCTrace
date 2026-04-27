@@ -67,7 +67,7 @@ Shader "Unlit/VRCTrace Camera"
                 ray.D = L;
                 ray.P = RayOffset(P, N);
                 ray.tMin = 0;
-                ray.tMax = RAY_MAX;
+                ray.tMax = length(positionToLight);
 
                 float3 color = 1;
 
@@ -76,12 +76,9 @@ Shader "Unlit/VRCTrace Camera"
                 float3 directDiffuse = Li * cosTheta;
 
                 Intersection isect;
-                if (SceneIntersects(ray, isect))
+                if (SceneIntersectsShadow(ray))
                 {
-                    if (isect.t < length(positionToLight))
-                    {
                         directDiffuse = 0;
-                    }
                 }
 
                 float3 viewDir = normalize(_WorldSpaceCameraPos.xyz - P);
@@ -90,6 +87,7 @@ Shader "Unlit/VRCTrace Camera"
 
                 ray.D = newDir;
                 ray.P = RayOffset(P, N);
+                ray.tMax = RAY_MAX;
 
                 float3 indirectDiffuse = 0;
 
@@ -108,21 +106,20 @@ Shader "Unlit/VRCTrace Camera"
 
                     ray.D = L;
                     ray.P = RayOffset(hitP, hitN);
+                    ray.tMax = length(positionToLight);
 
                     diffuseColor = isect.object == 9 ? float3(0,1,0) : diffuseColor;
 
                     Li = attenuation * lightColor * diffuseColor;
                     cosTheta = max(0.0, dot(hitN, L));
 
-
                     [branch]
                     if (cosTheta > 0 && !isBackFace)
                     {
                         indirectDiffuse = Li * cosTheta;
-                        if (SceneIntersects(ray, isect)) {
-                            if (isect.t < length(positionToLight)) {
+                        if (SceneIntersects(ray, isect))
+                        {
                                 indirectDiffuse = 0;
-                            }
                         }
                     }
                 }

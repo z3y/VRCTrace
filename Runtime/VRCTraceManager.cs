@@ -72,27 +72,31 @@ namespace VRCTrace
         }
 
 #if UNITY_EDITOR && !COMPILER_UDONSHARP
-
-        Texture2D BufferToTexture(Vector4[] buffer)
+        Texture2D BufferToTexture(IList<Vector4> buffer)
         {
-            // int minHeight = Mathf.NextPowerOfTwo((int)math.ceil(math.sqrt(buffer.Length)));
-            int minHeight = buffer.Length;
+            int count = buffer.Count;
+            int size = Mathf.NextPowerOfTwo(Mathf.CeilToInt(Mathf.Sqrt(count)));
 
-            var texture = new Texture2D(1, minHeight, TextureFormat.RGBAFloat, false)
+            var texture = new Texture2D(size, size, TextureFormat.RGBAFloat, false)
             {
                 wrapMode = TextureWrapMode.Clamp,
                 filterMode = FilterMode.Point
             };
 
-            for (int i = 0; i < buffer.Length; i++)
+            var pixels = new Color[size * size];
+
+            for (int i = 0; i < count; i++)
             {
+                int x = i % size;
+                int y = i / size;
+
                 var b = buffer[i];
-                texture.SetPixel(0, i, new Color(b.x, b.y, b.z, b.w));
+                pixels[y * size + x] = new Color(b.x, b.y, b.z, b.w);
             }
 
+            texture.SetPixels(pixels);
             return texture;
         }
-
         public void GenerateBuffers()
         {
             var renderer = GetStaticRenderers();
@@ -173,15 +177,16 @@ namespace VRCTrace
 
             var bvhNodesBuffer = BufferToTexture(nodes);
             var bvhTrianglesBuffer = BufferToTexture(bvhTris);
+            var normalsBuffer = BufferToTexture(allNormals);
 
             string nodesPath = Path.Combine(sceneFolder, "VRCTraceBVHNodes.asset");
             string trianglesPath = Path.Combine(sceneFolder, "VRCTraceBVHTriangles.asset");
-            // string normalsPath = Path.Combine(sceneFolder, "VRCTraceNormals.asset");
+            string normalsPath = Path.Combine(sceneFolder, "VRCTraceNormals.asset");
             // string uvsPath = Path.Combine(sceneFolder, "VRCTraceUVs.asset");
 
             AssetDatabase.CreateAsset(bvhNodesBuffer, nodesPath);
             AssetDatabase.CreateAsset(bvhTrianglesBuffer, trianglesPath);
-            // AssetDatabase.CreateAsset(normalsBuffer, normalsPath);
+            AssetDatabase.CreateAsset(normalsBuffer, normalsPath);
             // AssetDatabase.CreateAsset(uvsBuffer, uvsPath);
 
             // AssetDatabase.ImportAsset(vertPath);
@@ -192,8 +197,7 @@ namespace VRCTrace
 
             this.cwbvhNodesBuffer = AssetDatabase.LoadAssetAtPath<Texture2D>(nodesPath);
             this.cwbvhTrianglesBuffer = AssetDatabase.LoadAssetAtPath<Texture2D>(trianglesPath);
-            // cwbvhTrianglesBuffer = AssetDatabase.LoadAssetAtPath<Texture2D>(vertPath);
-            // this.normalsBuffer = AssetDatabase.LoadAssetAtPath<Texture2D>(normalsPath);
+            this.normalsBuffer = AssetDatabase.LoadAssetAtPath<Texture2D>(normalsPath);
             // this.uvsBuffer = AssetDatabase.LoadAssetAtPath<Texture2D>(uvsPath);
 
             EditorUtility.SetDirty(this);

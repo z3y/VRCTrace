@@ -1,3 +1,4 @@
+#if UNITY_EDITOR && !COMPILER_UDONSHARP
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -170,3 +171,4 @@ namespace TinyBVH
     raytraceShader.SetBuffer(kernel, "_BVHTriangles", triBuffer);
     */
 }
+#endif
