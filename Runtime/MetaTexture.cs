@@ -47,7 +47,7 @@ namespace VRCTrace
             Albedo = 0,
             Emission = 1,
         }
-        public Texture2D CreateCombinedAtlas(MeshRenderer[] renderers, Texture2D lightmap)
+        public Texture2D CreateCombinedAtlas(MeshRenderer[] renderers, Texture2D lightmap, Texture2D lightmapL1)
         {
             string sceneFolder = Path.GetDirectoryName(SceneManager.GetActiveScene().path);
 
@@ -58,6 +58,8 @@ namespace VRCTrace
             _combineMat.SetTexture("_Albedo", _rtCopy);
             _combineMat.SetTexture("_Emission", _rt);
             _combineMat.SetTexture("_Lightmap", lightmap);
+            _combineMat.SetTexture("_LightmapL1", lightmapL1);
+            _combineMat.SetFloat("_UseLightmapL1", lightmapL1 ? 1 : 0);
 
             Graphics.Blit(Texture2D.blackTexture, _rtFinal, _combineMat, 0);
 

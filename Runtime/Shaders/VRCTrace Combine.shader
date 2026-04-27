@@ -30,6 +30,8 @@ Shader "Hidden/VRCTrace/Combine"
             sampler2D _Albedo;
             sampler2D _Emission;
             sampler2D _Lightmap;
+            sampler2D _LightmapL1;
+            bool _UseLightmapL1;
 
             v2f vert (appdata v)
             {
@@ -48,6 +50,15 @@ Shader "Hidden/VRCTrace/Combine"
             float4 frag (v2f i) : SV_Target
             {
                 float3 lm = tex2D(_Lightmap, i.uv);
+                if (_UseLightmapL1)
+                {
+                    float3 normalWS = float3(0,1,0);
+                    float3 lml1 = tex2D(_LightmapL1, i.uv);
+
+                    lm += lml1.y;
+                }
+                lm = max(0, lm);
+
                 float3 albedo = tex2D(_Albedo, i.uv);
                 i.uv.y = 1.0 - i.uv.y;
                 float3 emission = tex2D(_Emission, i.uv);

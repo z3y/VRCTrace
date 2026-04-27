@@ -1,0 +1,652 @@
+{
+	"configurations" : 
+	[
+		{
+			"abstractTargets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "Git::Git::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-Git__Git-Debug-62d90fa0ffb16abbf867.json",
+					"name" : "Git::Git",
+					"projectIndex" : 0
+				}
+			],
+			"directories" : 
+			[
+				{
+					"abstractTargetIndexes" : 
+					[
+						0
+					],
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-bc21df00ebb8346057c9.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.15"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						2,
+						7
+					]
+				},
+				{
+					"build" : "_deps/tinybvh-build",
+					"jsonFile" : "directory-_deps.tinybvh-build-Debug-ce7313b2c504cf9f80ad.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.20"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 1,
+					"source" : "build/_deps/tinybvh-src",
+					"targetIndexes" : 
+					[
+						1,
+						3,
+						4,
+						5,
+						6
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"abstractTargetIndexes" : 
+					[
+						0
+					],
+					"childIndexes" : 
+					[
+						1
+					],
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "tinybvh_unity",
+					"targetIndexes" : 
+					[
+						0,
+						2,
+						7
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						1
+					],
+					"name" : "tiny_bvh",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						1,
+						3,
+						4,
+						5,
+						6
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "ALL_BUILD::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ALL_BUILD-Debug-3a99bb82d4acbe14287c.json",
+					"name" : "ALL_BUILD",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "ALL_BUILD::@d472a9e5b199ad3dadf1",
+					"jsonFile" : "target-ALL_BUILD-Debug-9c0d31a580d46b124455.json",
+					"name" : "ALL_BUILD",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ZERO_CHECK::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ZERO_CHECK-Debug-2f80f1280d55aa34ec38.json",
+					"name" : "ZERO_CHECK",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "tiny_bvh_fenster::@d472a9e5b199ad3dadf1",
+					"jsonFile" : "target-tiny_bvh_fenster-Debug-2008076c8fb8a2f9931a.json",
+					"name" : "tiny_bvh_fenster",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "tiny_bvh_minimal::@d472a9e5b199ad3dadf1",
+					"jsonFile" : "target-tiny_bvh_minimal-Debug-7988c1b7448bdae44b73.json",
+					"name" : "tiny_bvh_minimal",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "tiny_bvh_renderer::@d472a9e5b199ad3dadf1",
+					"jsonFile" : "target-tiny_bvh_renderer-Debug-66acbe2eaae6d8e8c2a1.json",
+					"name" : "tiny_bvh_renderer",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "tiny_bvh_speedtest::@d472a9e5b199ad3dadf1",
+					"jsonFile" : "target-tiny_bvh_speedtest-Debug-19a4c0ed2e2579b5210e.json",
+					"name" : "tiny_bvh_speedtest",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "tinybvh_unity::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-tinybvh_unity-Debug-eaa9de080a4365380050.json",
+					"name" : "tinybvh_unity",
+					"projectIndex" : 0
+				}
+			]
+		},
+		{
+			"abstractTargets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "Git::Git::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-Git__Git-Release-62d90fa0ffb16abbf867.json",
+					"name" : "Git::Git",
+					"projectIndex" : 0
+				}
+			],
+			"directories" : 
+			[
+				{
+					"abstractTargetIndexes" : 
+					[
+						0
+					],
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Release-85bf7314ed633fe4829e.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.15"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						2,
+						7
+					]
+				},
+				{
+					"build" : "_deps/tinybvh-build",
+					"jsonFile" : "directory-_deps.tinybvh-build-Release-ce7313b2c504cf9f80ad.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.20"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 1,
+					"source" : "build/_deps/tinybvh-src",
+					"targetIndexes" : 
+					[
+						1,
+						3,
+						4,
+						5,
+						6
+					]
+				}
+			],
+			"name" : "Release",
+			"projects" : 
+			[
+				{
+					"abstractTargetIndexes" : 
+					[
+						0
+					],
+					"childIndexes" : 
+					[
+						1
+					],
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "tinybvh_unity",
+					"targetIndexes" : 
+					[
+						0,
+						2,
+						7
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						1
+					],
+					"name" : "tiny_bvh",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						1,
+						3,
+						4,
+						5,
+						6
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "ALL_BUILD::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ALL_BUILD-Release-3a99bb82d4acbe14287c.json",
+					"name" : "ALL_BUILD",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "ALL_BUILD::@d472a9e5b199ad3dadf1",
+					"jsonFile" : "target-ALL_BUILD-Release-9c0d31a580d46b124455.json",
+					"name" : "ALL_BUILD",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ZERO_CHECK::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ZERO_CHECK-Release-2f80f1280d55aa34ec38.json",
+					"name" : "ZERO_CHECK",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "tiny_bvh_fenster::@d472a9e5b199ad3dadf1",
+					"jsonFile" : "target-tiny_bvh_fenster-Release-537e905861582067da0e.json",
+					"name" : "tiny_bvh_fenster",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "tiny_bvh_minimal::@d472a9e5b199ad3dadf1",
+					"jsonFile" : "target-tiny_bvh_minimal-Release-b0a26a2dbf42f6e994a2.json",
+					"name" : "tiny_bvh_minimal",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "tiny_bvh_renderer::@d472a9e5b199ad3dadf1",
+					"jsonFile" : "target-tiny_bvh_renderer-Release-b5650dac08f03326b6e3.json",
+					"name" : "tiny_bvh_renderer",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "tiny_bvh_speedtest::@d472a9e5b199ad3dadf1",
+					"jsonFile" : "target-tiny_bvh_speedtest-Release-cffb5c544700a4dc3eac.json",
+					"name" : "tiny_bvh_speedtest",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "tinybvh_unity::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-tinybvh_unity-Release-ff66281303a2d5933779.json",
+					"name" : "tinybvh_unity",
+					"projectIndex" : 0
+				}
+			]
+		},
+		{
+			"abstractTargets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "Git::Git::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-Git__Git-MinSizeRel-62d90fa0ffb16abbf867.json",
+					"name" : "Git::Git",
+					"projectIndex" : 0
+				}
+			],
+			"directories" : 
+			[
+				{
+					"abstractTargetIndexes" : 
+					[
+						0
+					],
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-MinSizeRel-8c330ccb95e71f4935a8.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.15"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						2,
+						7
+					]
+				},
+				{
+					"build" : "_deps/tinybvh-build",
+					"jsonFile" : "directory-_deps.tinybvh-build-MinSizeRel-ce7313b2c504cf9f80ad.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.20"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 1,
+					"source" : "build/_deps/tinybvh-src",
+					"targetIndexes" : 
+					[
+						1,
+						3,
+						4,
+						5,
+						6
+					]
+				}
+			],
+			"name" : "MinSizeRel",
+			"projects" : 
+			[
+				{
+					"abstractTargetIndexes" : 
+					[
+						0
+					],
+					"childIndexes" : 
+					[
+						1
+					],
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "tinybvh_unity",
+					"targetIndexes" : 
+					[
+						0,
+						2,
+						7
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						1
+					],
+					"name" : "tiny_bvh",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						1,
+						3,
+						4,
+						5,
+						6
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "ALL_BUILD::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ALL_BUILD-MinSizeRel-3a99bb82d4acbe14287c.json",
+					"name" : "ALL_BUILD",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "ALL_BUILD::@d472a9e5b199ad3dadf1",
+					"jsonFile" : "target-ALL_BUILD-MinSizeRel-9c0d31a580d46b124455.json",
+					"name" : "ALL_BUILD",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ZERO_CHECK::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ZERO_CHECK-MinSizeRel-2f80f1280d55aa34ec38.json",
+					"name" : "ZERO_CHECK",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "tiny_bvh_fenster::@d472a9e5b199ad3dadf1",
+					"jsonFile" : "target-tiny_bvh_fenster-MinSizeRel-6b0a849a2d9eec8f9b87.json",
+					"name" : "tiny_bvh_fenster",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "tiny_bvh_minimal::@d472a9e5b199ad3dadf1",
+					"jsonFile" : "target-tiny_bvh_minimal-MinSizeRel-631cc84aefeeee7720e2.json",
+					"name" : "tiny_bvh_minimal",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "tiny_bvh_renderer::@d472a9e5b199ad3dadf1",
+					"jsonFile" : "target-tiny_bvh_renderer-MinSizeRel-d4c491c7189c844e42ac.json",
+					"name" : "tiny_bvh_renderer",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "tiny_bvh_speedtest::@d472a9e5b199ad3dadf1",
+					"jsonFile" : "target-tiny_bvh_speedtest-MinSizeRel-20a79badecd670c8cf57.json",
+					"name" : "tiny_bvh_speedtest",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "tinybvh_unity::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-tinybvh_unity-MinSizeRel-08f390ba844bda2206f0.json",
+					"name" : "tinybvh_unity",
+					"projectIndex" : 0
+				}
+			]
+		},
+		{
+			"abstractTargets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "Git::Git::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-Git__Git-RelWithDebInfo-62d90fa0ffb16abbf867.json",
+					"name" : "Git::Git",
+					"projectIndex" : 0
+				}
+			],
+			"directories" : 
+			[
+				{
+					"abstractTargetIndexes" : 
+					[
+						0
+					],
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-RelWithDebInfo-6cd164b098465f96dc24.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.15"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						2,
+						7
+					]
+				},
+				{
+					"build" : "_deps/tinybvh-build",
+					"jsonFile" : "directory-_deps.tinybvh-build-RelWithDebInfo-ce7313b2c504cf9f80ad.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.20"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 1,
+					"source" : "build/_deps/tinybvh-src",
+					"targetIndexes" : 
+					[
+						1,
+						3,
+						4,
+						5,
+						6
+					]
+				}
+			],
+			"name" : "RelWithDebInfo",
+			"projects" : 
+			[
+				{
+					"abstractTargetIndexes" : 
+					[
+						0
+					],
+					"childIndexes" : 
+					[
+						1
+					],
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "tinybvh_unity",
+					"targetIndexes" : 
+					[
+						0,
+						2,
+						7
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						1
+					],
+					"name" : "tiny_bvh",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						1,
+						3,
+						4,
+						5,
+						6
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "ALL_BUILD::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ALL_BUILD-RelWithDebInfo-3a99bb82d4acbe14287c.json",
+					"name" : "ALL_BUILD",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "ALL_BUILD::@d472a9e5b199ad3dadf1",
+					"jsonFile" : "target-ALL_BUILD-RelWithDebInfo-9c0d31a580d46b124455.json",
+					"name" : "ALL_BUILD",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ZERO_CHECK::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ZERO_CHECK-RelWithDebInfo-2f80f1280d55aa34ec38.json",
+					"name" : "ZERO_CHECK",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "tiny_bvh_fenster::@d472a9e5b199ad3dadf1",
+					"jsonFile" : "target-tiny_bvh_fenster-RelWithDebInfo-c3b91a69698df2bd85a3.json",
+					"name" : "tiny_bvh_fenster",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "tiny_bvh_minimal::@d472a9e5b199ad3dadf1",
+					"jsonFile" : "target-tiny_bvh_minimal-RelWithDebInfo-1a91554a3f5d3de62cce.json",
+					"name" : "tiny_bvh_minimal",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "tiny_bvh_renderer::@d472a9e5b199ad3dadf1",
+					"jsonFile" : "target-tiny_bvh_renderer-RelWithDebInfo-f75180b1af518615ccfc.json",
+					"name" : "tiny_bvh_renderer",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "tiny_bvh_speedtest::@d472a9e5b199ad3dadf1",
+					"jsonFile" : "target-tiny_bvh_speedtest-RelWithDebInfo-6afade04a187bda845d0.json",
+					"name" : "tiny_bvh_speedtest",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "tinybvh_unity::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-tinybvh_unity-RelWithDebInfo-7774c42ca0f2382aceb7.json",
+					"name" : "tinybvh_unity",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build",
+		"source" : "D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 9
+	}
+}

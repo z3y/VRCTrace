@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="D:\Unity\Projects\VRCTrace\Packages\com.z3y.vrctrace\Runtime\tinybvh\src~\build\_deps\tinybvh-src\tiny_bvh_renderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\Unity\Projects\VRCTrace\Packages\com.z3y.vrctrace\Runtime\tinybvh\src~\build\_deps\tinybvh-src\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{FCAC01EA-9E25-3755-8834-470B68124EA2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

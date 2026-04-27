@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/_deps/tinybvh-subbuild/CMakeFiles/tinybvh-populate"
+		},
+		{
+			"file" : "D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/_deps/tinybvh-subbuild/CMakeFiles/d313c54cab077a15ce4f92bf7b8b89b6/tinybvh-populate.rule"
+		},
+		{
+			"file" : "D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/_deps/tinybvh-subbuild/CMakeFiles/79263007f04b1147f0bfbfd9d4620c7a/tinybvh-populate-complete.rule"
+		},
+		{
+			"file" : "D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/_deps/tinybvh-subbuild/CMakeFiles/dee738e4dc476f3d2b9ca724211f8207/tinybvh-populate-build.rule"
+		},
+		{
+			"file" : "D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/_deps/tinybvh-subbuild/CMakeFiles/dee738e4dc476f3d2b9ca724211f8207/tinybvh-populate-configure.rule"
+		},
+		{
+			"file" : "D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/_deps/tinybvh-subbuild/CMakeFiles/dee738e4dc476f3d2b9ca724211f8207/tinybvh-populate-download.rule"
+		},
+		{
+			"file" : "D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/_deps/tinybvh-subbuild/CMakeFiles/dee738e4dc476f3d2b9ca724211f8207/tinybvh-populate-install.rule"
+		},
+		{
+			"file" : "D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/_deps/tinybvh-subbuild/CMakeFiles/dee738e4dc476f3d2b9ca724211f8207/tinybvh-populate-mkdir.rule"
+		},
+		{
+			"file" : "D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/_deps/tinybvh-subbuild/CMakeFiles/dee738e4dc476f3d2b9ca724211f8207/tinybvh-populate-patch.rule"
+		},
+		{
+			"file" : "D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/_deps/tinybvh-subbuild/CMakeFiles/dee738e4dc476f3d2b9ca724211f8207/tinybvh-populate-test.rule"
+		},
+		{
+			"file" : "D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/_deps/tinybvh-subbuild/CMakeFiles/dee738e4dc476f3d2b9ca724211f8207/tinybvh-populate-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"tinybvh-populate"
+		],
+		"name" : "tinybvh-populate"
+	}
+}

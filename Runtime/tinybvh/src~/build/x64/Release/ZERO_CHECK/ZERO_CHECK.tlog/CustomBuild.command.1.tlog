@@ -1,0 +1,10 @@
+^D:\UNITY\PROJECTS\VRCTRACE\PACKAGES\COM.Z3Y.VRCTRACE\RUNTIME\TINYBVH\SRC~\BUILD\CMAKEFILES\8E21121BB94A78D36C7202ECCF89CB9A\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SD:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~ -BD:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/tinybvh_unity.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

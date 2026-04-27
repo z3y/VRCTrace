@@ -2,57 +2,58 @@
 
 #define VRCTRACE_PI 3.14159265359
 
-Texture2D<float4> _UdonVRCTraceVertices;
-Texture2D<float4> _UdonVRCTraceNormals;
-Texture2D<float4> _UdonVRCTraceBounds;
-Texture2D<float4> _UdonVRCTraceUVs;
+Texture2D<float4> _UdonVRCTraceBVHNodes;
+Texture2D<float4> _UdonVRCTraceBVHTriangles;
+// Texture2D<float4> _UdonVRCTraceNormals;
+// Texture2D<float4> _UdonVRCTraceUVs;
+
 Texture2D _UdonVRCTraceCombinedAtlas;
 TextureCube _UdonVRCTraceSkybox;
 SamplerState sampler_UdonVRCTraceSkybox;
 
-uint _UdonVRCTraceBoundsWidth;
-uint _UdonVRCTraceDataWidth;
+// uint _UdonVRCTraceBoundsWidth;
+// uint _UdonVRCTraceDataWidth;
 
 struct Ray
 {
     float3 P;
     float3 D;
-    // float tmax;
-    // float tmin;
+    float tMax;
+    float tMin;
 };
 
 struct Intersection
 {
     float t, u, v;
-    int prim;
-    int depth;
-    int shader;
-    int object;
+    uint prim;
+    uint depth;
+    uint shader;
+    uint object;
 };
 
-struct Bounds
-{
-    float3 Min;
-    float3 Max;
-};
+// struct Bounds
+// {
+//     float3 Min;
+//     float3 Max;
+// };
 
-int2 DataIndex(int index)
-{
-    uint width = _UdonVRCTraceDataWidth;
-    uint h = (index / width) * 3;
-    uint v = index % width;
+// int2 DataIndex(int index)
+// {
+//     uint width = _UdonVRCTraceDataWidth;
+//     uint h = (index / width) * 3;
+//     uint v = index % width;
 
-    return int2(v, h);
-}
+//     return int2(v, h);
+// }
 
-int2 BoundsIndex(int index)
-{
-    uint width = _UdonVRCTraceBoundsWidth;
-    uint h = (index / width) * 2;
-    uint v = index % width;
+// int2 BoundsIndex(int index)
+// {
+//     uint width = _UdonVRCTraceBoundsWidth;
+//     uint h = (index / width) * 2;
+//     uint v = index % width;
 
-    return int2(v, h);
-}
+//     return int2(v, h);
+// }
 
 // make sure to use the normal and not the ray direction
 #if 1
@@ -82,63 +83,23 @@ float3 RayOffset(float3 P, float3 Ng)
 }
 #endif
 
-bool IntersectsTriangle(Ray ray, float3 v0, float3 v1, float3 v2, out float t, out float u, out float v)
-{
-    float3 e1 = v1 - v0;
-    float3 e2 = v2 - v0;
-    float3 p = cross(ray.D, e2);
-    float det = dot(e1, p);
+// void TrianglePointNormal(Intersection intersection, out float3 P, out float3 Ng)
+// {
+//     int tri_index = intersection.prim;
+//     int2 data_idx = DataIndex(tri_index);
+//     float3 v0 = _UdonVRCTraceVertices[data_idx].xyz;
+//     data_idx.y++;
+//     float3 v1 = _UdonVRCTraceVertices[data_idx].xyz;
+//     data_idx.y++;
+//     float3 v2 = _UdonVRCTraceVertices[data_idx].xyz;
 
-    if (abs(det) < 1e-8) return false; // parallel
+//     float u = intersection.u;
+//     float v = intersection.v;
 
-    float invDet = 1.0 / det;
-    float3 tvec = ray.P - v0;
-    u = dot(tvec, p) * invDet;
-    if (u < 0.0 || u > 1.0) return false;
-
-    float3 q = cross(tvec, e1);
-    v = dot(ray.D, q) * invDet;
-    if (v < 0.0 || u + v > 1.0) return false;
-
-    t = dot(e2, q) * invDet;
-    if (t < 0.0) return false;
-
-    return true;
-}
-
-float BoundsDistance(Ray ray, Bounds bounds)
-{
-    float3 invD = rcp(ray.D);
-
-    float3 tMin = (bounds.Min - ray.P) * invD;
-    float3 tMax = (bounds.Max - ray.P) * invD;
-    float3 t1 = min(tMin, tMax);
-    float3 t2 = max(tMin, tMax);
-    float tNear = max(max(t1.x, t1.y), t1.z);
-    float tFar = min(min(t2.x, t2.y), t2.z);
-
-    bool hit = tFar >= tNear && tFar > 0;
-    float dst = hit ? tNear > 0 ? tNear : 0 : 1.#INF;
-    return dst;
-}
-
-void TrianglePointNormal(Intersection intersection, out float3 P, out float3 Ng)
-{
-    int tri_index = intersection.prim;
-    int2 data_idx = DataIndex(tri_index);
-    float3 v0 = _UdonVRCTraceVertices[data_idx].xyz;
-    data_idx.y++;
-    float3 v1 = _UdonVRCTraceVertices[data_idx].xyz;
-    data_idx.y++;
-    float3 v2 = _UdonVRCTraceVertices[data_idx].xyz;
-
-    float u = intersection.u;
-    float v = intersection.v;
-
-    float w = 1.0 - u - v;
-    P = (w * v0 + u * v1 + v * v2);
-    Ng = normalize(cross(v1 - v0, v2 - v0));
-}
+//     float w = 1.0 - u - v;
+//     P = (w * v0 + u * v1 + v * v2);
+//     Ng = normalize(cross(v1 - v0, v2 - v0));
+// }
 
 inline float3 VRCTrace_SafeNormalize(float3 inVec)
 {
@@ -146,148 +107,216 @@ inline float3 VRCTrace_SafeNormalize(float3 inVec)
     return inVec * rsqrt(dp3);
 }
 
-float3 TriangleSmoothNormal(Intersection intersection, float3 Ng)
+// float3 TriangleSmoothNormal(Intersection intersection, float3 Ng)
+// {
+//     uint tri_index = intersection.prim;
+//     int2 data_idx = DataIndex(tri_index);
+//     float3 n0 = _UdonVRCTraceNormals[data_idx].xyz;
+//     data_idx.y++;
+//     float3 n1 = _UdonVRCTraceNormals[data_idx].xyz;
+//     data_idx.y++;
+//     float3 n2 = _UdonVRCTraceNormals[data_idx].xyz;
+
+//     float u = intersection.u;
+//     float v = intersection.v;
+
+//     float3 N = VRCTrace_SafeNormalize((1.0 - u - v) * n0 + u * n1 + v * n2);
+//     return all(N == 0) ? Ng : N;
+// }
+
+// float2 TriangleUV(Intersection intersection)
+// {
+//     uint tri_index = intersection.prim;
+//     int2 data_idx = DataIndex(tri_index);
+//     float2 n0 = _UdonVRCTraceUVs[data_idx].xy;
+//     data_idx.y++;
+//     float2 n1 = _UdonVRCTraceUVs[data_idx].xy;
+//     data_idx.y++;
+//     float2 n2 = _UdonVRCTraceUVs[data_idx].xy;
+
+//     float u = intersection.u;
+//     float v = intersection.v;
+
+//     float2 uv = float2((1.0 - u - v) * n0 + u * n1 + v * n2);
+//     return uv;
+// }
+
+bool SceneIntersects(Ray ray, out Intersection hit, bool anyHit = false)
 {
-    uint tri_index = intersection.prim;
-    int2 data_idx = DataIndex(tri_index);
-    float3 n0 = _UdonVRCTraceNormals[data_idx].xyz;
-    data_idx.y++;
-    float3 n1 = _UdonVRCTraceNormals[data_idx].xyz;
-    data_idx.y++;
-    float3 n2 = _UdonVRCTraceNormals[data_idx].xyz;
+    float3 O = ray.P;
+    float3 D = ray.D;
+    float tmax = ray.tMax;
 
-    float u = intersection.u;
-    float v = intersection.v;
+    float3 invDir = rcp(D);
+    uint octinv4 = (7u - ((D.x < 0 ? 4u : 0u) | (D.y < 0 ? 2u : 0u) | (D.z < 0 ? 1u : 0u))) * 0x1010101u;
 
-    float3 N = VRCTrace_SafeNormalize((1.0 - u - v) * n0 + u * n1 + v * n2);
-    return all(N == 0) ? Ng : N;
-}
+    uint2 stack[32];
+    uint stackPtr = 0;
+    uint2 nodeGroup = uint2(0, 0x80000000u);
+    uint2 triGroup = uint2(0, 0u);
 
-float2 TriangleUV(Intersection intersection)
-{
-    uint tri_index = intersection.prim;
-    int2 data_idx = DataIndex(tri_index);
-    float2 n0 = _UdonVRCTraceUVs[data_idx].xy;
-    data_idx.y++;
-    float2 n1 = _UdonVRCTraceUVs[data_idx].xy;
-    data_idx.y++;
-    float2 n2 = _UdonVRCTraceUVs[data_idx].xy;
+    float2 uv = float2(0, 0);
+    // float hitAddrFloat = 0;
+    uint hitTriIndex = 0;
 
-    float u = intersection.u;
-    float v = intersection.v;
-
-    float2 uv = float2((1.0 - u - v) * n0 + u * n1 + v * n2);
-    return uv;
-}
-
-// adapted from https://github.com/SebLague/Ray-Tracing (MIT)
-bool SceneIntersects(Ray ray, out Intersection intersection)
-{
-    int stack[32];
-    int stackIndex = 0;
-    stack[stackIndex++] = 0;
-
-    intersection.t = 1e30;
-    intersection.u = 0;
-    intersection.v = 0;
-    intersection.prim = -1;
-    intersection.depth = 0;
-    intersection.shader = -1;
-    intersection.object = -1;
-
-    float t, u, v;
-    bool hit = false;
-
-    int safe = 0;
-    bool globalsExist = _UdonVRCTraceBoundsWidth != 0;
-    if (!globalsExist)
+    while (true)
     {
-        safe = 1024;
-    }
-
-    while (stackIndex > 0 && safe < 1024)
-    {
-        safe++;
-        int boundsIndex = stack[--stackIndex];
-
-        int2 boundsIndex0 = BoundsIndex(boundsIndex);
-        float4 b0 = _UdonVRCTraceBounds[boundsIndex0];
-        boundsIndex0.y++;
-        float4 b1 = _UdonVRCTraceBounds[boundsIndex0];
-
-        bool isLeaf = asint(b1.w) > 0;
-
-        [branch]
-        if (isLeaf)
+        if (nodeGroup.y > 0x00FFFFFFu)
         {
-            int triangleStart = asint(b0.w);
-            int triangleEnd = triangleStart + asint(b1.w);
+            uint mask = nodeGroup.y;
+            uint childBitIndex = firstbithigh(mask);
+            uint childNodeBaseIndex = nodeGroup.x;
 
-            for (int triangleIndex = triangleStart; triangleIndex < triangleEnd; triangleIndex++)
+            nodeGroup.y &= ~(1u << childBitIndex);
+            if (nodeGroup.y > 0x00FFFFFFu)
+                stack[stackPtr++] = nodeGroup;
+
+            uint slotIndex = (childBitIndex - 24u) ^ (octinv4 & 255u);
+            uint relativeIndex = countbits(mask & ~(0xFFFFFFFFu << slotIndex));
+            uint childNodeIndex = childNodeBaseIndex + relativeIndex;
+
+            float4 n0 = _UdonVRCTraceBVHNodes[0, childNodeIndex * 5 + 0];
+            float4 n1 = _UdonVRCTraceBVHNodes[0, childNodeIndex * 5 + 1];
+            float4 n2 = _UdonVRCTraceBVHNodes[0, childNodeIndex * 5 + 2];
+            float4 n3 = _UdonVRCTraceBVHNodes[0, childNodeIndex * 5 + 3];
+            float4 n4 = _UdonVRCTraceBVHNodes[0, childNodeIndex * 5 + 4];
+
+            uint packed = asuint(n0.w);
+            float nodeInvX = asfloat(((ExtractByte(packed, 0) ^ 0x80u) - 0x80u + 127u) << 23) * invDir.x;
+            float nodeInvY = asfloat(((ExtractByte(packed, 1) ^ 0x80u) - 0x80u + 127u) << 23) * invDir.y;
+            float nodeInvZ = asfloat(((ExtractByte(packed, 2) ^ 0x80u) - 0x80u + 127u) << 23) * invDir.z;
+            float3 nodeInvDir = float3(nodeInvX, nodeInvY, nodeInvZ);
+            float3 nodePos = (n0.xyz - O) * invDir;
+
+            uint hitmask = 0;
+
+            [unroll]
+            for (int i = 0; i < 2; ++i)
             {
-                int2 dataIndex = DataIndex(triangleIndex);
-                float4 v0 = _UdonVRCTraceVertices[dataIndex];
-                dataIndex.y++;
-                float4 v1 = _UdonVRCTraceVertices[dataIndex];
-                dataIndex.y++;
-                float4 v2 = _UdonVRCTraceVertices[dataIndex];
+                uint meta = asuint(i == 0 ? n1.z : n1.w);
 
-                intersection.depth++;
+                float4 lox = ExtractBytes(invDir.x < 0 ? (i == 0 ? n3.z : n3.w) : (i == 0 ? n2.x : n2.y));
+                float4 loy = ExtractBytes(invDir.y < 0 ? (i == 0 ? n4.x : n4.y) : (i == 0 ? n2.z : n2.w));
+                float4 loz = ExtractBytes(invDir.z < 0 ? (i == 0 ? n4.z : n4.w) : (i == 0 ? n3.x : n3.y));
+                float4 hix = ExtractBytes(invDir.x < 0 ? (i == 0 ? n2.x : n2.y) : (i == 0 ? n3.z : n3.w));
+                float4 hiy = ExtractBytes(invDir.y < 0 ? (i == 0 ? n2.z : n2.w) : (i == 0 ? n4.x : n4.y));
+                float4 hiz = ExtractBytes(invDir.z < 0 ? (i == 0 ? n3.x : n3.y) : (i == 0 ? n4.z : n4.w));
 
-                if (IntersectsTriangle(ray, v0.xyz, v1.xyz, v2.xyz, t, u, v))
+                float4 tminx = lox * nodeInvDir.x + nodePos.x;
+                float4 tmaxx = hix * nodeInvDir.x + nodePos.x;
+                float4 tminy = loy * nodeInvDir.y + nodePos.y;
+                float4 tmaxy = hiy * nodeInvDir.y + nodePos.y;
+                float4 tminz = loz * nodeInvDir.z + nodePos.z;
+                float4 tmaxz = hiz * nodeInvDir.z + nodePos.z;
+
+                float4 cmin = max(max(max(tminx, tminy), tminz), 0.0f);
+                float4 cmax = min(min(min(tmaxx, tmaxy), tmaxz), tmax);
+
+                uint isInner = (meta & (meta << 1)) & 0x10101010u;
+                uint innerMask = (isInner >> 4) * 0xFFu;
+                uint bitIndex = (meta ^ (octinv4 & innerMask)) & 0x1F1F1F1Fu;
+                uint childBits = (meta >> 5) & 0x07070707u;
+
+                [unroll]
+                for (int j = 0; j < 4; ++j)
                 {
-                    if (t < intersection.t)
+                    if (cmin[j] <= cmax[j])
                     {
-                        intersection.t = t;
-                        intersection.u = u;
-                        intersection.v = v;
-                        intersection.prim = triangleIndex;
-                        intersection.shader = asint(v0.w);
-                        intersection.object = asint(v1.w);
-                        hit = true;
+                        uint shiftBits = (childBits >> (j * 8)) & 255u;
+                        uint bitShift = (bitIndex >> (j * 8)) & 31u;
+                        hitmask |= shiftBits << bitShift;
+                    }
+                }
+            }
+
+            nodeGroup.x = asuint(n1.x);
+            nodeGroup.y = (hitmask & 0xFF000000u) | (asuint(n0.w) >> 24);
+            triGroup.x = asuint(n1.y);
+            triGroup.y = hitmask & 0x00FFFFFFu;
+        }
+        else
+        {
+            triGroup = nodeGroup;
+            nodeGroup = uint2(0, 0u);
+        }
+
+        while (triGroup.y != 0u)
+        {
+            int triangleIndex = firstbithigh(triGroup.y);
+            int triAddr = triGroup.x + triangleIndex * 3;
+            triGroup.y -= 1u << triangleIndex;
+
+            // CWBVHTriangles layout: [e1, e2, v0] each a float4
+            float3 e1 = _UdonVRCTraceBVHTriangles[0, triAddr + 0].xyz;
+            float3 e2 = _UdonVRCTraceBVHTriangles[0, triAddr + 1].xyz;
+            float4 v0 = _UdonVRCTraceBVHTriangles[0, triAddr + 2];
+
+            float3 r = cross(D, e1);
+            float a = dot(e2, r);
+            if (abs(a) > 1e-7f)
+            {
+                float f = 1.0f / a;
+                float3 s = O - v0.xyz;
+                float u = f * dot(s, r);
+                if (u >= 0.0f && u <= 1.0f)
+                {
+                    float3 q = cross(s, e2);
+                    float v = f * dot(D, q);
+                    if (v >= 0.0f && u + v <= 1.0f)
+                    {
+                        float d = f * dot(e1, q);
+                        if (d > 0.0f && d < tmax)
+                        {
+                            if (anyHit)
+                            {
+                                return true;
+                            }
+                            tmax = d;
+                            uv = float2(u, v);
+                            hitTriIndex = triAddr;
+                        }
                     }
                 }
             }
         }
-        else {
-            
-            int childIndexA = asint(b0.w) + 0;
-            int childIndexB = asint(b0.w) + 1;
 
-            int2 bounds_idx = BoundsIndex(childIndexA);
-            float4 l0 = _UdonVRCTraceBounds[bounds_idx];
-            bounds_idx.y++;
-            float4 l1 = _UdonVRCTraceBounds[bounds_idx];
-
-            int2 bounds_id2 = BoundsIndex(childIndexB);
-            float4 r0 = _UdonVRCTraceBounds[bounds_id2];
-            bounds_id2.y++;
-            float4 r1 = _UdonVRCTraceBounds[bounds_id2];
-
-            Bounds boundsL;
-            boundsL.Min = l0.xyz;
-            boundsL.Max = l1.xyz;
-            Bounds boundsR;
-            boundsR.Min = r0.xyz;
-            boundsR.Max = r1.xyz;
-
-            intersection.depth++;
-            float dstA = BoundsDistance(ray, boundsL);
-            float dstB = BoundsDistance(ray, boundsR);
-            bool isNearestA = dstA <= dstB;
-            float dstNear = isNearestA ? dstA : dstB;
-            float dstFar = isNearestA ? dstB : dstA;
-
-            int childIndexNear = isNearestA ? childIndexA : childIndexB;
-            int childIndexFar = isNearestA ? childIndexB : childIndexA;
-
-            if (dstFar < intersection.t) stack[stackIndex++] = childIndexFar;
-            if (dstNear < intersection.t) stack[stackIndex++] = childIndexNear;
+        if (nodeGroup.y <= 0x00FFFFFFu)
+        {
+            if (stackPtr > 0)
+                nodeGroup = stack[--stackPtr];
+            else
+                break;
         }
     }
-    
-    return hit;
+
+    if (tmax < ray.tMax)
+    {
+        hit.u = uv.x;
+        hit.v = uv.y;
+        float3 e1 = CWBVHTriangles[hitTriIndex + 0].xyz;
+        float3 e2 = CWBVHTriangles[hitTriIndex + 1].xyz;
+        float4 v0 = CWBVHTriangles[hitTriIndex + 2];
+
+        hit.prim = asuint(v0.w);
+        hit.object = asuint(v1.w);
+
+        hit.t = tmax;
+
+        hit.p0 = v0.xyz;
+        hit.p1 = v0.xyz + e2;
+        hit.p2 = v0.xyz + e1;
+        return true;
+    }
+    return false;
 }
+
+bool SceneIntersectsShadow(Ray ray)
+{
+    Hit hit;
+    return SceneIntersects(ray, hit, true);
+}
+
+#else
 
 float3 RandomDirectionInHemisphere(float3 normal, float2 rand)
 {

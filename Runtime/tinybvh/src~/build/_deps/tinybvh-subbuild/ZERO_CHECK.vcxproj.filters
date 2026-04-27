@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="D:\Unity\Projects\VRCTrace\Packages\com.z3y.vrctrace\Runtime\tinybvh\src~\build\_deps\tinybvh-subbuild\CMakeFiles\d313c54cab077a15ce4f92bf7b8b89b6\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{496190B3-CCD5-3F2F-B07A-33ADFECA9523}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

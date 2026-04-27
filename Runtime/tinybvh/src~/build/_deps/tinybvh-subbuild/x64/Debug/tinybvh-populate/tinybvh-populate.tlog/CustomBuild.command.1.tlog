@@ -1,0 +1,150 @@
+^D:\UNITY\PROJECTS\VRCTRACE\PACKAGES\COM.Z3Y.VRCTRACE\RUNTIME\TINYBVH\SRC~\BUILD\_DEPS\TINYBVH-SUBBUILD\CMAKEFILES\DEE738E4DC476F3D2B9CA724211F8207\TINYBVH-POPULATE-MKDIR.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -Dcfgdir=/Debug -P D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/_deps/tinybvh-subbuild/tinybvh-populate-prefix/tmp/tinybvh-populate-mkdirs.cmake
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E touch D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/_deps/tinybvh-subbuild/tinybvh-populate-prefix/src/tinybvh-populate-stamp/Debug/tinybvh-populate-mkdir
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\UNITY\PROJECTS\VRCTRACE\PACKAGES\COM.Z3Y.VRCTRACE\RUNTIME\TINYBVH\SRC~\BUILD\_DEPS\TINYBVH-SUBBUILD\CMAKEFILES\DEE738E4DC476F3D2B9CA724211F8207\TINYBVH-POPULATE-DOWNLOAD.RULE
+setlocal
+cd D:\Unity\Projects\VRCTrace\Packages\com.z3y.vrctrace\Runtime\tinybvh\src~\build\_deps
+if %errorlevel% neq 0 goto :cmEnd
+D:
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -DCMAKE_MESSAGE_LOG_LEVEL=VERBOSE -P D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/_deps/tinybvh-subbuild/tinybvh-populate-prefix/tmp/tinybvh-populate-gitclone.cmake
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E touch D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/_deps/tinybvh-subbuild/tinybvh-populate-prefix/src/tinybvh-populate-stamp/Debug/tinybvh-populate-download
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\UNITY\PROJECTS\VRCTRACE\PACKAGES\COM.Z3Y.VRCTRACE\RUNTIME\TINYBVH\SRC~\BUILD\_DEPS\TINYBVH-SUBBUILD\CMAKEFILES\DEE738E4DC476F3D2B9CA724211F8207\TINYBVH-POPULATE-UPDATE.RULE
+setlocal
+cd D:\Unity\Projects\VRCTrace\Packages\com.z3y.vrctrace\Runtime\tinybvh\src~\build\_deps\tinybvh-src
+if %errorlevel% neq 0 goto :cmEnd
+D:
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -Dcan_fetch=YES -DCMAKE_MESSAGE_LOG_LEVEL=VERBOSE -P D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/_deps/tinybvh-subbuild/tinybvh-populate-prefix/tmp/tinybvh-populate-gitupdate.cmake
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\UNITY\PROJECTS\VRCTRACE\PACKAGES\COM.Z3Y.VRCTRACE\RUNTIME\TINYBVH\SRC~\BUILD\_DEPS\TINYBVH-SUBBUILD\CMAKEFILES\DEE738E4DC476F3D2B9CA724211F8207\TINYBVH-POPULATE-PATCH.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E echo_append
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E touch D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/_deps/tinybvh-subbuild/tinybvh-populate-prefix/src/tinybvh-populate-stamp/Debug/tinybvh-populate-patch
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\UNITY\PROJECTS\VRCTRACE\PACKAGES\COM.Z3Y.VRCTRACE\RUNTIME\TINYBVH\SRC~\BUILD\_DEPS\TINYBVH-SUBBUILD\CMAKEFILES\DEE738E4DC476F3D2B9CA724211F8207\TINYBVH-POPULATE-CONFIGURE.RULE
+setlocal
+cd D:\Unity\Projects\VRCTrace\Packages\com.z3y.vrctrace\Runtime\tinybvh\src~\build\_deps\tinybvh-build
+if %errorlevel% neq 0 goto :cmEnd
+D:
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo_append
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E touch D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/_deps/tinybvh-subbuild/tinybvh-populate-prefix/src/tinybvh-populate-stamp/Debug/tinybvh-populate-configure
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\UNITY\PROJECTS\VRCTRACE\PACKAGES\COM.Z3Y.VRCTRACE\RUNTIME\TINYBVH\SRC~\BUILD\_DEPS\TINYBVH-SUBBUILD\CMAKEFILES\DEE738E4DC476F3D2B9CA724211F8207\TINYBVH-POPULATE-BUILD.RULE
+setlocal
+cd D:\Unity\Projects\VRCTrace\Packages\com.z3y.vrctrace\Runtime\tinybvh\src~\build\_deps\tinybvh-build
+if %errorlevel% neq 0 goto :cmEnd
+D:
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo_append
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E touch D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/_deps/tinybvh-subbuild/tinybvh-populate-prefix/src/tinybvh-populate-stamp/Debug/tinybvh-populate-build
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\UNITY\PROJECTS\VRCTRACE\PACKAGES\COM.Z3Y.VRCTRACE\RUNTIME\TINYBVH\SRC~\BUILD\_DEPS\TINYBVH-SUBBUILD\CMAKEFILES\DEE738E4DC476F3D2B9CA724211F8207\TINYBVH-POPULATE-INSTALL.RULE
+setlocal
+cd D:\Unity\Projects\VRCTrace\Packages\com.z3y.vrctrace\Runtime\tinybvh\src~\build\_deps\tinybvh-build
+if %errorlevel% neq 0 goto :cmEnd
+D:
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo_append
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E touch D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/_deps/tinybvh-subbuild/tinybvh-populate-prefix/src/tinybvh-populate-stamp/Debug/tinybvh-populate-install
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\UNITY\PROJECTS\VRCTRACE\PACKAGES\COM.Z3Y.VRCTRACE\RUNTIME\TINYBVH\SRC~\BUILD\_DEPS\TINYBVH-SUBBUILD\CMAKEFILES\DEE738E4DC476F3D2B9CA724211F8207\TINYBVH-POPULATE-TEST.RULE
+setlocal
+cd D:\Unity\Projects\VRCTrace\Packages\com.z3y.vrctrace\Runtime\tinybvh\src~\build\_deps\tinybvh-build
+if %errorlevel% neq 0 goto :cmEnd
+D:
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E echo_append
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E touch D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/_deps/tinybvh-subbuild/tinybvh-populate-prefix/src/tinybvh-populate-stamp/Debug/tinybvh-populate-test
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\UNITY\PROJECTS\VRCTRACE\PACKAGES\COM.Z3Y.VRCTRACE\RUNTIME\TINYBVH\SRC~\BUILD\_DEPS\TINYBVH-SUBBUILD\CMAKEFILES\79263007F04B1147F0BFBFD9D4620C7A\TINYBVH-POPULATE-COMPLETE.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E make_directory D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/_deps/tinybvh-subbuild/CMakeFiles/Debug
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E touch D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/_deps/tinybvh-subbuild/CMakeFiles/Debug/tinybvh-populate-complete
+if %errorlevel% neq 0 goto :cmEnd
+"C:\Program Files\CMake\bin\cmake.exe" -E touch D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/_deps/tinybvh-subbuild/tinybvh-populate-prefix/src/tinybvh-populate-stamp/Debug/tinybvh-populate-done
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\UNITY\PROJECTS\VRCTRACE\PACKAGES\COM.Z3Y.VRCTRACE\RUNTIME\TINYBVH\SRC~\BUILD\_DEPS\TINYBVH-SUBBUILD\CMAKEFILES\D313C54CAB077A15CE4F92BF7B8B89B6\TINYBVH-POPULATE.RULE
+setlocal
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\UNITY\PROJECTS\VRCTRACE\PACKAGES\COM.Z3Y.VRCTRACE\RUNTIME\TINYBVH\SRC~\BUILD\_DEPS\TINYBVH-SUBBUILD\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SD:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/_deps/tinybvh-subbuild -BD:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/_deps/tinybvh-subbuild --check-stamp-file D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/_deps/tinybvh-subbuild/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

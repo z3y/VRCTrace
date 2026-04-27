@@ -1,4 +1,5 @@
 ﻿
+#if UDONSHARP
 using UdonSharp;
 using UnityEngine;
 using VRC.SDKBase;
@@ -239,7 +240,6 @@ public class VRCTraceGI : UdonSharpBehaviour
         VRCGraphics.Blit(_rtProbeTex1, _rtProbeTex1Copy);
         VRCGraphics.Blit(_rtProbeTex2, _rtProbeTex2Copy);
 
-        probeCopy.Update();
     }
 
     void Update()
@@ -253,6 +253,7 @@ public class VRCTraceGI : UdonSharpBehaviour
             if (_sample < sampleCount)
             {
                 BakeLightmapSample();
+                BakeLightmapSample();
             }
         }
 
@@ -261,7 +262,10 @@ public class VRCTraceGI : UdonSharpBehaviour
             if (_probeSample < probeSampleCount)
             {
                 BakeProbeSample();
+                BakeProbeSample();
+                probeCopy.Update();
             }
         }
     }
 }
+#endif

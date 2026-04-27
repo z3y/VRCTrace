@@ -1,0 +1,10 @@
+D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/CMakeFiles/tinybvh_unity.dir
+D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/CMakeFiles/INSTALL.dir
+D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/CMakeFiles/ALL_BUILD.dir
+D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/CMakeFiles/ZERO_CHECK.dir
+D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/_deps/tinybvh-build/CMakeFiles/tiny_bvh_minimal.dir
+D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/_deps/tinybvh-build/CMakeFiles/tiny_bvh_renderer.dir
+D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/_deps/tinybvh-build/CMakeFiles/tiny_bvh_speedtest.dir
+D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/_deps/tinybvh-build/CMakeFiles/tiny_bvh_fenster.dir
+D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/_deps/tinybvh-build/CMakeFiles/INSTALL.dir
+D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/_deps/tinybvh-build/CMakeFiles/ALL_BUILD.dir
