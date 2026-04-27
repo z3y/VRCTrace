@@ -75,7 +75,8 @@ namespace VRCTrace
 
         Texture2D BufferToTexture(Vector4[] buffer)
         {
-            int minHeight = Mathf.NextPowerOfTwo((int)math.ceil(math.sqrt(buffer.Length)));
+            // int minHeight = Mathf.NextPowerOfTwo((int)math.ceil(math.sqrt(buffer.Length)));
+            int minHeight = buffer.Length;
 
             var texture = new Texture2D(1, minHeight, TextureFormat.RGBAFloat, false)
             {

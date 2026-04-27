@@ -1,11 +1,14 @@
 #pragma once
 
-#define VRCTRACE_PI 3.14159265359
+static const float VRCTRACE_PI = 3.14159265359;
+static const float RAY_MAX = 10000.0;
 
 Texture2D<float4> _UdonVRCTraceBVHNodes;
 Texture2D<float4> _UdonVRCTraceBVHTriangles;
 // Texture2D<float4> _UdonVRCTraceNormals;
 // Texture2D<float4> _UdonVRCTraceUVs;
+
+
 
 Texture2D _UdonVRCTraceCombinedAtlas;
 TextureCube _UdonVRCTraceSkybox;
@@ -29,6 +32,10 @@ struct Intersection
     uint depth;
     uint shader;
     uint object;
+
+    float3 p0;
+    float3 p1;
+    float3 p2;
 };
 
 // struct Bounds
@@ -56,7 +63,6 @@ struct Intersection
 // }
 
 // make sure to use the normal and not the ray direction
-#if 1
 // "A Fast and Robust Method for Avoiding Self-Intersection"
 // Normal points outward for rays exiting the surface, else is flipped.
 float3 RayOffset(float3 p, float3 n)
@@ -76,53 +82,50 @@ float3 RayOffset(float3 p, float3 n)
                   abs(p.y) < origin ? p.y + floatScale * n.y : p_i.y,
                   abs(p.z) < origin ? p.z + floatScale * n.z : p_i.z);
 }
-#else
-float3 RayOffset(float3 P, float3 Ng)
+
+void TrianglePointNormal(Intersection intersection, out float3 P, out float3 Ng)
 {
-    return P + Ng * 0.001;
+    uint primitiveID = intersection.prim;
+    // int2 data_idx = DataIndex(tri_index);
+    // float3 v0 = _UdonVRCTraceBVHTriangles[uint2(0, primitiveID * 3 + 0)].xyz;
+    // float3 v1 = _UdonVRCTraceBVHTriangles[uint2(0, primitiveID * 3 + 1)].xyz;
+    // float3 v2 = _UdonVRCTraceBVHTriangles[uint2(0, primitiveID * 3 + 2)].xyz;
+
+    float u = intersection.u;
+    float v = intersection.v;
+
+    float3 p0 = intersection.p0;
+    float3 p1 = intersection.p1;
+    float3 p2 = intersection.p2;
+
+    float w = 1.0 - u - v;
+    P = (w * p0 + u * p1 + v * p2);
+    Ng = normalize(cross(p1 - p0, p2 - p0));
 }
-#endif
 
-// void TrianglePointNormal(Intersection intersection, out float3 P, out float3 Ng)
-// {
-//     int tri_index = intersection.prim;
-//     int2 data_idx = DataIndex(tri_index);
-//     float3 v0 = _UdonVRCTraceVertices[data_idx].xyz;
-//     data_idx.y++;
-//     float3 v1 = _UdonVRCTraceVertices[data_idx].xyz;
-//     data_idx.y++;
-//     float3 v2 = _UdonVRCTraceVertices[data_idx].xyz;
-
-//     float u = intersection.u;
-//     float v = intersection.v;
-
-//     float w = 1.0 - u - v;
-//     P = (w * v0 + u * v1 + v * v2);
-//     Ng = normalize(cross(v1 - v0, v2 - v0));
-// }
-
-inline float3 VRCTrace_SafeNormalize(float3 inVec)
+float3 VRCTrace_SafeNormalize(float3 inVec)
 {
     float dp3 = max(0.001f, dot(inVec, inVec));
     return inVec * rsqrt(dp3);
 }
 
-// float3 TriangleSmoothNormal(Intersection intersection, float3 Ng)
-// {
-//     uint tri_index = intersection.prim;
-//     int2 data_idx = DataIndex(tri_index);
-//     float3 n0 = _UdonVRCTraceNormals[data_idx].xyz;
-//     data_idx.y++;
-//     float3 n1 = _UdonVRCTraceNormals[data_idx].xyz;
-//     data_idx.y++;
-//     float3 n2 = _UdonVRCTraceNormals[data_idx].xyz;
+float3 TriangleSmoothNormal(Intersection intersection, float3 Ng)
+{
+    return Ng;
+    // uint tri_index = intersection.prim;
+    // int2 data_idx = DataIndex(tri_index);
+    // float3 n0 = _UdonVRCTraceNormals[data_idx].xyz;
+    // data_idx.y++;
+    // float3 n1 = _UdonVRCTraceNormals[data_idx].xyz;
+    // data_idx.y++;
+    // float3 n2 = _UdonVRCTraceNormals[data_idx].xyz;
 
-//     float u = intersection.u;
-//     float v = intersection.v;
+    // float u = intersection.u;
+    // float v = intersection.v;
 
-//     float3 N = VRCTrace_SafeNormalize((1.0 - u - v) * n0 + u * n1 + v * n2);
-//     return all(N == 0) ? Ng : N;
-// }
+    // float3 N = VRCTrace_SafeNormalize((1.0 - u - v) * n0 + u * n1 + v * n2);
+    // return all(N == 0) ? Ng : N;
+}
 
 // float2 TriangleUV(Intersection intersection)
 // {
@@ -140,6 +143,25 @@ inline float3 VRCTrace_SafeNormalize(float3 inVec)
 //     float2 uv = float2((1.0 - u - v) * n0 + u * n1 + v * n2);
 //     return uv;
 // }
+
+uint ExtractByte(uint value, uint byteIndex)
+{
+    return (value >> (byteIndex * 8)) & 0xFF;
+}
+
+// Extracts each byte from the float into the channel of a float4
+float4 ExtractBytes(float value)
+{
+    uint packed = asuint(value);
+
+    float4 channels = float4(
+        ExtractByte(packed, 0),
+        ExtractByte(packed, 1),
+        ExtractByte(packed, 2),
+        ExtractByte(packed, 3));
+
+    return channels;
+}
 
 bool SceneIntersects(Ray ray, out Intersection hit, bool anyHit = false)
 {
@@ -175,11 +197,11 @@ bool SceneIntersects(Ray ray, out Intersection hit, bool anyHit = false)
             uint relativeIndex = countbits(mask & ~(0xFFFFFFFFu << slotIndex));
             uint childNodeIndex = childNodeBaseIndex + relativeIndex;
 
-            float4 n0 = _UdonVRCTraceBVHNodes[0, childNodeIndex * 5 + 0];
-            float4 n1 = _UdonVRCTraceBVHNodes[0, childNodeIndex * 5 + 1];
-            float4 n2 = _UdonVRCTraceBVHNodes[0, childNodeIndex * 5 + 2];
-            float4 n3 = _UdonVRCTraceBVHNodes[0, childNodeIndex * 5 + 3];
-            float4 n4 = _UdonVRCTraceBVHNodes[0, childNodeIndex * 5 + 4];
+            float4 n0 = _UdonVRCTraceBVHNodes[uint2(0, childNodeIndex * 5 + 0)];
+            float4 n1 = _UdonVRCTraceBVHNodes[uint2(0, childNodeIndex * 5 + 1)];
+            float4 n2 = _UdonVRCTraceBVHNodes[uint2(0, childNodeIndex * 5 + 2)];
+            float4 n3 = _UdonVRCTraceBVHNodes[uint2(0, childNodeIndex * 5 + 3)];
+            float4 n4 = _UdonVRCTraceBVHNodes[uint2(0, childNodeIndex * 5 + 4)];
 
             uint packed = asuint(n0.w);
             float nodeInvX = asfloat(((ExtractByte(packed, 0) ^ 0x80u) - 0x80u + 127u) << 23) * invDir.x;
@@ -247,9 +269,9 @@ bool SceneIntersects(Ray ray, out Intersection hit, bool anyHit = false)
             triGroup.y -= 1u << triangleIndex;
 
             // CWBVHTriangles layout: [e1, e2, v0] each a float4
-            float3 e1 = _UdonVRCTraceBVHTriangles[0, triAddr + 0].xyz;
-            float3 e2 = _UdonVRCTraceBVHTriangles[0, triAddr + 1].xyz;
-            float4 v0 = _UdonVRCTraceBVHTriangles[0, triAddr + 2];
+            float3 e1 = _UdonVRCTraceBVHTriangles[uint2(0, triAddr + 0)].xyz;
+            float3 e2 = _UdonVRCTraceBVHTriangles[uint2(0, triAddr + 1)].xyz;
+            float4 v0 = _UdonVRCTraceBVHTriangles[uint2(0, triAddr + 2)];
 
             float3 r = cross(D, e1);
             float a = dot(e2, r);
@@ -293,16 +315,19 @@ bool SceneIntersects(Ray ray, out Intersection hit, bool anyHit = false)
     {
         hit.u = uv.x;
         hit.v = uv.y;
-        float3 e1 = CWBVHTriangles[hitTriIndex + 0].xyz;
-        float3 e2 = CWBVHTriangles[hitTriIndex + 1].xyz;
-        float4 v0 = CWBVHTriangles[hitTriIndex + 2];
+        float3 e1 = _UdonVRCTraceBVHTriangles[uint2(0, hitTriIndex + 0)].xyz;
+        float3 e2 = _UdonVRCTraceBVHTriangles[uint2(0, hitTriIndex + 1)].xyz;
+        float4 v0 = _UdonVRCTraceBVHTriangles[uint2(0, hitTriIndex + 2)];
 
         hit.prim = asuint(v0.w);
-        hit.object = asuint(v1.w);
+        // hit.object = asuint(v1.w);
 
         hit.t = tmax;
+        hit.object = 0;
+        hit.shader = 0;
+        hit.depth = 0;
 
-        hit.p0 = v0.xyz;
+        hit.p0 = v0;
         hit.p1 = v0.xyz + e2;
         hit.p2 = v0.xyz + e1;
         return true;
@@ -312,11 +337,9 @@ bool SceneIntersects(Ray ray, out Intersection hit, bool anyHit = false)
 
 bool SceneIntersectsShadow(Ray ray)
 {
-    Hit hit;
+    Intersection hit;
     return SceneIntersects(ray, hit, true);
 }
-
-#else
 
 float3 RandomDirectionInHemisphere(float3 normal, float2 rand)
 {
@@ -375,15 +398,15 @@ float3 RandomDirection(float2 xi)
 
 uint3 HashPcg3d(uint3 v)
 {
-  v = v * 1664525u + 1013904223u;
-  v.x += v.y * v.z;
-  v.y += v.z * v.x;
-  v.z += v.x * v.y;
-  v = v ^ (v >> 16);
-  v.x += v.y * v.z;
-  v.y += v.z * v.x;
-  v.z += v.x * v.y;
-  return v;
+    v = v * 1664525u + 1013904223u;
+    v.x += v.y * v.z;
+    v.y += v.z * v.x;
+    v.z += v.x * v.y;
+    v = v ^ (v >> 16);
+    v.x += v.y * v.z;
+    v.y += v.z * v.x;
+    v.z += v.x * v.y;
+    return v;
 }
 
 float2 GetRand(float2 k)

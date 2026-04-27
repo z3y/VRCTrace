@@ -66,7 +66,8 @@ Shader "Unlit/VRCTrace Camera"
                 Ray ray;
                 ray.D = L;
                 ray.P = RayOffset(P, N);
-
+                ray.tMin = 0;
+                ray.tMax = RAY_MAX;
 
                 float3 color = 1;
 
