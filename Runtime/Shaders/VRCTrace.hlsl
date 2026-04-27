@@ -6,7 +6,7 @@ static const float RAY_MAX = 10000.0;
 Texture2D<float4> _UdonVRCTraceBVHNodes;
 Texture2D<float4> _UdonVRCTraceBVHTriangles;
 Texture2D<float4> _UdonVRCTraceNormals;
-// Texture2D<float4> _UdonVRCTraceUVs;
+Texture2D<float4> _UdonVRCTraceUVs;
 
 
 Texture2D _UdonVRCTraceCombinedAtlas;
@@ -24,9 +24,9 @@ struct Ray
 struct Intersection
 {
     float t, u, v;
-    uint prim;
-    uint depth;
-    uint shader;
+    uint primitiveID;
+    // uint depth;
+    // uint shader;
     uint object;
 
     float3 p0;
@@ -65,7 +65,7 @@ float3 RayOffset(float3 p, float3 n)
 
 void TrianglePointNormal(Intersection intersection, out float3 P, out float3 Ng)
 {
-    uint primitiveID = intersection.prim;
+    uint primitiveID = intersection.primitiveID;
 
     float u = intersection.u;
     float v = intersection.v;
@@ -87,7 +87,7 @@ float3 VRCTrace_SafeNormalize(float3 inVec)
 
 float3 TriangleSmoothNormal(Intersection intersection, float3 Ng)
 {
-    uint primitiveID = intersection.prim;
+    uint primitiveID = intersection.primitiveID;
 
     float3 n0 = IndexTexture(_UdonVRCTraceNormals, primitiveID * 3 + 0).xyz;
     float3 n1 = IndexTexture(_UdonVRCTraceNormals, primitiveID * 3 + 1).xyz;
@@ -100,22 +100,19 @@ float3 TriangleSmoothNormal(Intersection intersection, float3 Ng)
     return all(N == 0) ? Ng : N;
 }
 
-// float2 TriangleUV(Intersection intersection)
-// {
-//     uint tri_index = intersection.prim;
-//     int2 data_idx = DataIndex(tri_index);
-//     float2 n0 = _UdonVRCTraceUVs[data_idx].xy;
-//     data_idx.y++;
-//     float2 n1 = _UdonVRCTraceUVs[data_idx].xy;
-//     data_idx.y++;
-//     float2 n2 = _UdonVRCTraceUVs[data_idx].xy;
+float2 TriangleUV(Intersection intersection)
+{
+    uint primitiveID = intersection.primitiveID;
+    float2 n0 = IndexTexture(_UdonVRCTraceUVs, primitiveID * 3 + 0).xy;
+    float2 n1 = IndexTexture(_UdonVRCTraceUVs, primitiveID * 3 + 1).xy;
+    float2 n2 = IndexTexture(_UdonVRCTraceUVs, primitiveID * 3 + 2).xy;
 
-//     float u = intersection.u;
-//     float v = intersection.v;
+    float u = intersection.u;
+    float v = intersection.v;
 
-//     float2 uv = float2((1.0 - u - v) * n0 + u * n1 + v * n2);
-//     return uv;
-// }
+    float2 uv = float2((1.0 - u - v) * n0 + u * n1 + v * n2);
+    return uv;
+}
 
 uint ExtractByte(uint value, uint byteIndex)
 {
@@ -292,13 +289,13 @@ bool SceneIntersects(Ray ray, out Intersection hit, bool anyHit = false)
         float3 e2 = IndexTexture(_UdonVRCTraceBVHTriangles, hitTriIndex + 1).xyz;
         float4 v0 = IndexTexture(_UdonVRCTraceBVHTriangles, hitTriIndex + 2);
 
-        hit.prim = asuint(v0.w);
+        hit.primitiveID = asuint(v0.w);
         // hit.object = asuint(v1.w);
 
         hit.t = tmax;
         hit.object = 0;
-        hit.shader = 0;
-        hit.depth = 0;
+        // hit.shader = 0;
+        // hit.depth = 0;
 
         hit.p0 = v0;
         hit.p1 = v0.xyz + e2;

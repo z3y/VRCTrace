@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: VRCTraceGI
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 367e49356cec5464e8b6d390d0329868,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: bfda30694a8f35b47b0e1adab094ef8c,
     type: 2}
   udonAssembly: 
   assemblyError: 

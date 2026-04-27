@@ -101,9 +101,9 @@ namespace VRCTrace
         {
             var renderer = GetStaticRenderers();
 
-            List<Vector4> bvhVertices = new List<Vector4>();
-            List<Vector2> allUVs = new List<Vector2>();
-            List<Vector4> allNormals = new List<Vector4>();
+            List<Vector4> bvhVertices = new();
+            List<Vector4> allUVs = new();
+            List<Vector4> allNormals = new();
 
             uint objectId = 0;
             foreach (var r in renderer)
@@ -178,27 +178,27 @@ namespace VRCTrace
             var bvhNodesBuffer = BufferToTexture(nodes);
             var bvhTrianglesBuffer = BufferToTexture(bvhTris);
             var normalsBuffer = BufferToTexture(allNormals);
+            var uvsBuffer = BufferToTexture(allUVs); // todo optimize
 
             string nodesPath = Path.Combine(sceneFolder, "VRCTraceBVHNodes.asset");
             string trianglesPath = Path.Combine(sceneFolder, "VRCTraceBVHTriangles.asset");
             string normalsPath = Path.Combine(sceneFolder, "VRCTraceNormals.asset");
-            // string uvsPath = Path.Combine(sceneFolder, "VRCTraceUVs.asset");
+            string uvsPath = Path.Combine(sceneFolder, "VRCTraceUVs.asset");
 
             AssetDatabase.CreateAsset(bvhNodesBuffer, nodesPath);
             AssetDatabase.CreateAsset(bvhTrianglesBuffer, trianglesPath);
             AssetDatabase.CreateAsset(normalsBuffer, normalsPath);
-            // AssetDatabase.CreateAsset(uvsBuffer, uvsPath);
+            AssetDatabase.CreateAsset(uvsBuffer, uvsPath);
 
-            // AssetDatabase.ImportAsset(vertPath);
-            // AssetDatabase.ImportAsset(normalsPath);
             AssetDatabase.ImportAsset(nodesPath);
             AssetDatabase.ImportAsset(trianglesPath);
-            // AssetDatabase.ImportAsset(uvsPath);
+            AssetDatabase.ImportAsset(normalsPath);
+            AssetDatabase.ImportAsset(uvsPath);
 
             this.cwbvhNodesBuffer = AssetDatabase.LoadAssetAtPath<Texture2D>(nodesPath);
             this.cwbvhTrianglesBuffer = AssetDatabase.LoadAssetAtPath<Texture2D>(trianglesPath);
             this.normalsBuffer = AssetDatabase.LoadAssetAtPath<Texture2D>(normalsPath);
-            // this.uvsBuffer = AssetDatabase.LoadAssetAtPath<Texture2D>(uvsPath);
+            this.uvsBuffer = AssetDatabase.LoadAssetAtPath<Texture2D>(uvsPath);
 
             EditorUtility.SetDirty(this);
             SetGlobals();

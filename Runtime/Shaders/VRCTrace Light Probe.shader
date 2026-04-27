@@ -127,6 +127,8 @@ Shader "Unlit/VRCTrace Light Probe"
                 Ray ray;
                 ray.D = L;
                 ray.P = P;
+                ray.tMin = 0;
+                ray.tMax = RAY_MAX;
 
                 float3 Li = attenuation * lightColor;
 

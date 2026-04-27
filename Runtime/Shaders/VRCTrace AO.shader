@@ -89,12 +89,13 @@ Shader "Unlit/VRCTrace AO"
                 Ray ray;
                 ray.D = RandomDirectionInHemisphere(N, xi);
                 ray.P = RayOffset(P, N);
+                ray.tMin = 0;
+                ray.tMax = RAY_MAX;
                 float3 ao = 1;
 
-                Intersection isect;
-                if (SceneIntersects(ray, isect))
+                if (SceneIntersectsShadow(ray))
                 {
-                    ao *= 0;
+                    ao = 0;
                 }
 
                 float3 accumulated = (previousRt.rgb * _UdonVRCTraceSample + ao) / (_UdonVRCTraceSample + 1);

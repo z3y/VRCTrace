@@ -135,6 +135,8 @@ Shader "Unlit/VRCTrace Lightmap"
                 Ray ray;
                 ray.D = L;
                 ray.P = RayOffset(P, N);
+                ray.tMin = 0;
+                ray.tMax = length(positionToLight);
 
 
                 float3 color = 1;
@@ -150,22 +152,20 @@ Shader "Unlit/VRCTrace Lightmap"
 
 
                 Intersection isect;
-                if (SceneIntersects(ray, isect))
+                if (SceneIntersectsShadow(ray))
                 {
-                    if (isect.t < length(positionToLight))
-                    {
-                        directDiffuse = 0;
-                        L0 = 0;
-                        L1x = 0;
-                        L1y = 0;
-                        L1z = 0;
-                    }
+                    directDiffuse = 0;
+                    L0 = 0;
+                    L1x = 0;
+                    L1y = 0;
+                    L1z = 0;
                 }
 
                 float3 newDir = RandomDirectionInHemisphere(N, xi);
 
                 ray.D = newDir;
                 ray.P = RayOffset(P, N);
+                ray.tMax = RAY_MAX;
 
                 float3 indirectDiffuse = 0;
                 float3 L0_1 = 0;
@@ -187,6 +187,7 @@ Shader "Unlit/VRCTrace Lightmap"
 
                     ray.D = L;
                     ray.P = RayOffset(hitP, hitN);
+                    ray.tMax = length(positionToLight);
 
                     diffuseColor = isect.object == 9 ? float3(0,1,0) : diffuseColor;
 
@@ -205,15 +206,14 @@ Shader "Unlit/VRCTrace Lightmap"
                         L1y_1 = Li * (cosTheta * newDir.y) * Y1;
                         L1z_1 = Li * (cosTheta * newDir.z) * Y1;
 
-                        if (SceneIntersects(ray, isect)) {
-                            if (isect.t < length(positionToLight))
-                            {
-                                indirectDiffuse = 0;
-                                L0_1 = 0;
-                                L1x_1 = 0;
-                                L1y_1 = 0;
-                                L1z_1 = 0;
-                            }
+
+                        if (SceneIntersectsShadow(ray))
+                        {
+                            indirectDiffuse = 0;
+                            L0_1 = 0;
+                            L1x_1 = 0;
+                            L1y_1 = 0;
+                            L1z_1 = 0;
                         }
                     }
                 }
