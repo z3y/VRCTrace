@@ -2,9 +2,12 @@
 
 Software GPU Ray Tracing for VRChat using CWBVH (https://github.com/jbikker/tinybvh)
 
+[See it in VRChat](https://vrchat.com/home/world/wrld_f7fa38b7-947a-4e34-a3e1-e082a4eb5b39/info)
+
 ### How to use
 
 Add VRCTraceManager to a gameobject and press Generate Buffers to create a BVH for static objects in the scene.
+
 
 ### Example Shader
 
@@ -14,11 +17,12 @@ Add VRCTraceManager to a gameobject and press Generate Buffers to create a BVH f
 
 ...
 
+
 Ray ray;
 ray.D = rayDirection;
 ray.P = RayOffset(positionWS, normalWS);
 ray.tMin = 0;
-ray.tMax = RAY_MAX;
+ray.tMax = 10000;
 
 Intersection intersection;
 if (SceneIntersects(ray, intersection))
