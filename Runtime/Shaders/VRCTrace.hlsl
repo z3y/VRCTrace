@@ -295,7 +295,7 @@ bool SceneIntersects(Ray ray, out Intersection hit, bool anyHit = false)
         hit.t = tmax;
         hit.object = 0;
 
-        hit.p0 = v0;
+        hit.p0 = v0.xyz;
         hit.p1 = v0.xyz + e2;
         hit.p2 = v0.xyz + e1;
         return true;
