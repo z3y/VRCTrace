@@ -72,37 +72,119 @@ namespace VRCTrace
         }
 
 #if UNITY_EDITOR && !COMPILER_UDONSHARP
+        // Texture2D BufferToTexture(IList<Vector4> buffer)
+        // {
+        //     int count = buffer.Count;
+        //     int size = Mathf.NextPowerOfTwo(Mathf.CeilToInt(Mathf.Sqrt(count)));
+
+        //     var texture = new Texture2D(size, size, TextureFormat.RGBAFloat, false)
+        //     {
+        //         wrapMode = TextureWrapMode.Clamp,
+        //         filterMode = FilterMode.Point
+        //     };
+
+        //     var pixels = new Color[size * size];
+
+        //     for (int i = 0; i < count; i++)
+        //     {
+        //         int x = i % size;
+        //         int y = i / size;
+
+        //         var b = buffer[i];
+        //         pixels[y * size + x] = new Color(b.x, b.y, b.z, b.w);
+        //     }
+
+        //     texture.SetPixels(pixels);
+        //     return texture;
+        // }
+        // Texture2D BufferToTexture(IList<Vector2> buffer)
+        // {
+        //     int count = buffer.Count;
+        //     int size = Mathf.NextPowerOfTwo(Mathf.CeilToInt(Mathf.Sqrt(count)));
+
+        //     var texture = new Texture2D(size, size, TextureFormat.RGFloat, false)
+        //     {
+        //         wrapMode = TextureWrapMode.Clamp,
+        //         filterMode = FilterMode.Point
+        //     };
+
+        //     var pixels = new Color[size * size];
+
+        //     for (int i = 0; i < count; i++)
+        //     {
+        //         int x = i % size;
+        //         int y = i / size;
+
+        //         var b = buffer[i];
+        //         pixels[y * size + x] = new Color(b.x, b.y, 0, 0);
+        //     }
+
+        //     texture.SetPixels(pixels);
+        //     return texture;
+        // }
+
         Texture2D BufferToTexture(IList<Vector4> buffer)
         {
             int count = buffer.Count;
-            int size = Mathf.NextPowerOfTwo(Mathf.CeilToInt(Mathf.Sqrt(count)));
 
-            var texture = new Texture2D(size, size, TextureFormat.RGBAFloat, false)
+            int width = Mathf.NextPowerOfTwo(Mathf.CeilToInt(count / 16384.0f));
+            width = Mathf.Max(width, 1);
+            int height = Mathf.CeilToInt((float)count / width);
+
+            var texture = new Texture2D(width, height, TextureFormat.RGBAFloat, false)
             {
                 wrapMode = TextureWrapMode.Clamp,
                 filterMode = FilterMode.Point
             };
 
-            var pixels = new Color[size * size];
+            var pixels = new Color[width * height];
 
             for (int i = 0; i < count; i++)
             {
-                int x = i % size;
-                int y = i / size;
-
+                int x = i % width;
+                int y = i / width;
                 var b = buffer[i];
-                pixels[y * size + x] = new Color(b.x, b.y, b.z, b.w);
+                pixels[y * width + x] = new Color(b.x, b.y, b.z, b.w);
             }
 
             texture.SetPixels(pixels);
             return texture;
         }
+
+        Texture2D BufferToTexture(IList<Vector2> buffer)
+        {
+            int count = buffer.Count;
+
+            int width = Mathf.NextPowerOfTwo(Mathf.CeilToInt(count / 16384.0f));
+            width = Mathf.Max(width, 1);
+            int height = Mathf.CeilToInt((float)count / width);
+
+            var texture = new Texture2D(width, height, TextureFormat.RGFloat, false)
+            {
+                wrapMode = TextureWrapMode.Clamp,
+                filterMode = FilterMode.Point
+            };
+
+            var pixels = new Color[width * height];
+
+            for (int i = 0; i < count; i++)
+            {
+                int x = i % width;
+                int y = i / width;
+                var b = buffer[i];
+                pixels[y * width + x] = new Color(b.x, b.y, 0, 0);
+            }
+
+            texture.SetPixels(pixels);
+            return texture;
+        }
+
         public void GenerateBuffers()
         {
             var renderer = GetStaticRenderers();
 
             List<Vector4> bvhVertices = new();
-            List<Vector4> allUVs = new();
+            List<Vector2> allUVs = new();
             List<Vector4> allNormals = new();
 
             uint objectId = 0;
@@ -178,7 +260,7 @@ namespace VRCTrace
             var bvhNodesBuffer = BufferToTexture(nodes);
             var bvhTrianglesBuffer = BufferToTexture(bvhTris);
             var normalsBuffer = BufferToTexture(allNormals);
-            var uvsBuffer = BufferToTexture(allUVs); // todo optimize
+            var uvsBuffer = BufferToTexture(allUVs);
 
             string nodesPath = Path.Combine(sceneFolder, "VRCTraceBVHNodes.asset");
             string trianglesPath = Path.Combine(sceneFolder, "VRCTraceBVHTriangles.asset");

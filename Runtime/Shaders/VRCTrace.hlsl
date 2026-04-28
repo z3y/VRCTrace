@@ -294,8 +294,6 @@ bool SceneIntersects(Ray ray, out Intersection hit, bool anyHit = false)
 
         hit.t = tmax;
         hit.object = 0;
-        // hit.shader = 0;
-        // hit.depth = 0;
 
         hit.p0 = v0;
         hit.p1 = v0.xyz + e2;
@@ -383,4 +381,45 @@ float2 GetRand(float2 k)
 {
     float2 f = HashPcg3d(k.xyy).xy;
     return f * (1.0f / (float)0xFFFFFFFFu);
+}
+
+float3 SampleGGXVNDF(float3 V, float roughness, float2 u)
+{
+    float ax = max(roughness, 0.002);
+    float ay = max(roughness, 0.002);
+
+    // Stretch view
+    float3 Vh = normalize(float3(ax * V.x, ay * V.y, V.z));
+
+    // Build orthonormal basis around Vh
+    float lensq = Vh.x * Vh.x + Vh.y * Vh.y;
+    float3 T1 = lensq > 0.0
+        ? float3(-Vh.y, Vh.x, 0.0) * rsqrt(lensq)
+        : float3(1.0, 0.0, 0.0);
+    float3 T2 = cross(Vh, T1);
+
+    // Sample point on disk
+    float r   = sqrt(u.x);
+    float phi = 2.0 * VRCTRACE_PI * u.y;
+    float t1  = r * cos(phi);
+    float t2  = r * sin(phi);
+    float s   = 0.5 * (1.0 + Vh.z);
+    t2        = lerp(sqrt(max(0.0, 1.0 - t1 * t1)), t2, s);
+
+    // Reproject onto hemisphere
+    float3 Nh = t1 * T1 + t2 * T2
+              + sqrt(max(0.0, 1.0 - t1*t1 - t2*t2)) * Vh;
+
+    // Unstretch → microfacet normal (half vector) in tangent space
+    float3 H = normalize(float3(ax * Nh.x, ay * Nh.y, max(0.0, Nh.z)));
+    return H;
+}
+
+float3x3 GetTangentFrame(float3 N)
+{
+    // Build arbitrary tangent/bitangent from normal
+    float3 up = abs(N.y) < 0.999 ? float3(0, 1, 0) : float3(1, 0, 0);
+    float3 T  = normalize(cross(up, N));
+    float3 B  = cross(N, T);
+    return float3x3(T, B, N); // rows = T, B, N
 }
