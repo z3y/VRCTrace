@@ -1,6 +1,6 @@
 ## VRCTrace
 
-Software GPU Ray Tracing for VRChat
+Software GPU Ray Tracing for VRChat using CWBVH (https://github.com/jbikker/tinybvh)
 
 ### How to use
 
@@ -17,6 +17,8 @@ Add VRCTraceManager to a gameobject and press Generate Buffers to create a BVH f
 Ray ray;
 ray.D = rayDirection;
 ray.P = RayOffset(positionWS, normalWS);
+ray.tMin = 0;
+ray.tMax = RAY_MAX;
 
 Intersection intersection;
 if (SceneIntersects(ray, intersection))
@@ -34,6 +36,3 @@ if (SceneIntersects(ray, intersection))
 - Shaders can then sample this atlas using hit UVs for the reflection
 
 <img width="3840" height="2160" alt="VRChat_2025-10-06_19-43-12 543_3840x2160" src="https://github.com/user-attachments/assets/368e7015-e281-4b57-a486-475b07a4b36a" />
-
-
-Adapted from Sebastian Lague's ray tracing tutorials.
