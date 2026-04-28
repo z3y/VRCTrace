@@ -1,6 +1,6 @@
 {
   "name": "com.z3y.vrctrace",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "unity": "2022.3",
   "displayName": "VRCTrace",
   "hideInEditor": false,
