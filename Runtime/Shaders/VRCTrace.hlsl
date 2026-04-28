@@ -150,10 +150,6 @@ bool SceneIntersects(Ray ray, out Intersection hit, bool anyHit = false)
     float2 uv = float2(0, 0);
     uint hitTriIndex = 0;
 
-    float3 hitE1;
-    float3 hitE2;
-    float4 hitV0;
-    
     while (true)
     {
         if (nodeGroup.y > 0x00FFFFFFu)
@@ -268,10 +264,7 @@ bool SceneIntersects(Ray ray, out Intersection hit, bool anyHit = false)
                             }
                             tmax = d;
                             uv = float2(u, v);
-                            // hitTriIndex = triAddr;
-                            hitE1 = e1;
-                            hitE2 = e2;
-                            hitV0 = v0;
+                            hitTriIndex = triAddr;
                         }
                     }
                 }
@@ -292,19 +285,19 @@ bool SceneIntersects(Ray ray, out Intersection hit, bool anyHit = false)
         hit.u = uv.x;
         hit.v = uv.y;
 
-        // float3 e1 = IndexTexture(_UdonVRCTraceBVHTriangles, hitTriIndex + 0).xyz;
-        // float3 e2 = IndexTexture(_UdonVRCTraceBVHTriangles, hitTriIndex + 1).xyz;
-        // float4 v0 = IndexTexture(_UdonVRCTraceBVHTriangles, hitTriIndex + 2);
+        float3 e1 = IndexTexture(_UdonVRCTraceBVHTriangles, hitTriIndex + 0).xyz;
+        float3 e2 = IndexTexture(_UdonVRCTraceBVHTriangles, hitTriIndex + 1).xyz;
+        float4 v0 = IndexTexture(_UdonVRCTraceBVHTriangles, hitTriIndex + 2);
 
-        hit.primitiveID = asuint(hitV0.w);
+        hit.primitiveID = asuint(v0.w);
         // hit.object = asuint(v1.w);
 
         hit.t = tmax;
         hit.object = 0;
 
-        hit.p0 = hitV0;
-        hit.p1 = hitV0.xyz + hitE2;
-        hit.p2 = hitV0.xyz + hitE1;
+        hit.p0 = v0;
+        hit.p1 = v0.xyz + e2;
+        hit.p2 = v0.xyz + e1;
         return true;
     }
     return false;
