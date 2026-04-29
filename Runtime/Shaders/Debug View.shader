@@ -3,6 +3,8 @@ Shader "Unlit/VRCTrace/Debug View"
     Properties
     {
         [Enum(Ng, 0, N, 1, P, 2, UV, 3, Color, 4)] _Type ("Type", Int) = 0
+
+        [Toggle(_AO)] _EnableAO("AO", Int) = 0
     }
     SubShader
     {
@@ -22,6 +24,7 @@ Shader "Unlit/VRCTrace/Debug View"
 
             // #define _VERTEXTRACE
             // #define _REFLECTIONS
+            #pragma shader_feature_local_fragment _AO
 
             struct appdata
             {
@@ -59,6 +62,7 @@ Shader "Unlit/VRCTrace/Debug View"
             {
                 float3 P = i.positionWS;
                 float3 viewDir = normalize(_WorldSpaceCameraPos.xyz - P);
+                float2 xi = GetRand(i.vertex.xy * _Time.y);
 
                 Ray ray;
                 ray.P = _WorldSpaceCameraPos.xyz;
@@ -66,7 +70,7 @@ Shader "Unlit/VRCTrace/Debug View"
                 ray.tMin = 0;
                 ray.tMax = RAY_MAX;
 
-                float4 color = 0;
+                float4 color = float4(0,0,0,1);
                 Intersection intersection;
                 if (SceneIntersects(ray, intersection))
                 {
@@ -92,6 +96,24 @@ Shader "Unlit/VRCTrace/Debug View"
                         float3 hitCombined = _UdonVRCTraceCombinedAtlas.SampleLevel(sampler_BilinearClamp, hitUV, 0).rgb;
                         color.rgb = hitCombined;
                     }
+
+
+                    #ifdef _AO
+
+                    ray.D = RandomDirectionInHemisphere(hitN, xi);
+                    ray.P = RayOffset(hitP, hitN);
+                    ray.tMax = 1.5;
+
+                    if (SceneIntersectsShadow(ray))
+                    {
+                        color.rgb = 0;
+                    }
+                    else
+                    {
+                        color.rgb = 1;
+                    }
+
+                    #endif
                 }
 
                 return color;
