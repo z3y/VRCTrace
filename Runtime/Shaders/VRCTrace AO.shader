@@ -1,4 +1,4 @@
-Shader "Unlit/VRCTrace AO"
+Shader "Unlit/VRCTrace/AO"
 {
     Properties
     {

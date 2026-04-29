@@ -1,4 +1,4 @@
-Shader "Unlit/VRCTrace Camera"
+Shader "Unlit/VRCTrace/Camera"
 {
     Properties
     {

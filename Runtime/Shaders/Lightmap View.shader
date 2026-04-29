@@ -1,4 +1,4 @@
-Shader "Unlit/Lightmap View"
+Shader "Unlit/VRCTrace/Lightmap View"
 {
     Properties
     {

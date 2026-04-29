@@ -1,4 +1,4 @@
-Shader "Unlit/VRCTrace Light Probe"
+Shader "Unlit/VRCTrace/Light Probe"
 {
     Properties
     {
