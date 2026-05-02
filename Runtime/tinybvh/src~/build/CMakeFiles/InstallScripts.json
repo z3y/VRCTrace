@@ -1,8 +1,0 @@
-{
-	"InstallScripts" : 
-	[
-		"D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/cmake_install.cmake",
-		"D:/Unity/Projects/VRCTrace/Packages/com.z3y.vrctrace/Runtime/tinybvh/src~/build/_deps/tinybvh-build/cmake_install.cmake"
-	],
-	"Parallel" : false
-}
