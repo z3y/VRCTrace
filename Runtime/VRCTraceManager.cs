@@ -184,7 +184,7 @@ namespace VRCTrace
             var renderer = GetStaticRenderers();
 
             List<Vector4> bvhVertices = new();
-            List<Vector2> allUVs = new();
+            List<Vector4> allUVs = new();
             List<Vector4> allNormals = new();
 
             uint objectId = 0;
@@ -223,12 +223,7 @@ namespace VRCTrace
                     p0 = f.transform.TransformPoint(p0);
                     p1 = f.transform.TransformPoint(p1);
                     p2 = f.transform.TransformPoint(p2);
-                    var v0 = new Vector4(p0.x, p0.y, p0.z, math.asfloat((uint)primitiveID + primitiveIDOffset));
-                    var v1 = new Vector4(p1.x, p1.y, p1.z, math.asfloat(objectId));
-                    var v2 = new Vector4(p2.x, p2.y, p2.z, 0); // unused
-                    bvhVertices.Add(v0);
-                    bvhVertices.Add(v1);
-                    bvhVertices.Add(v2);
+
 
                     var n0 = norm[i0];
                     var n1 = norm[i1];
@@ -236,16 +231,35 @@ namespace VRCTrace
                     n0 = f.transform.TransformDirection(n0);
                     n1 = f.transform.TransformDirection(n1);
                     n2 = f.transform.TransformDirection(n2);
-                    allNormals.Add(n0);
-                    allNormals.Add(n1);
-                    allNormals.Add(n2);
+                    // allNormals.Add(n0);
+                    // allNormals.Add(n1);
+                    // allNormals.Add(n2);
+
+                    uint n0e = EncodeNormalOctahedral(n0);
+                    uint n1e = EncodeNormalOctahedral(n1);
+                    uint n2e = EncodeNormalOctahedral(n2);
+                    Vector4 packedNormals = new(math.asfloat(n0e), math.asfloat(n1e), math.asfloat(n2e), math.asfloat(0)); // .w unused
+                    allNormals.Add(packedNormals);
 
                     var uv0 = uv[i0];
                     var uv1 = uv[i1];
                     var uv2 = uv[i2];
-                    allUVs.Add(uv0);
-                    allUVs.Add(uv1);
-                    allUVs.Add(uv2);
+                    // allUVs.Add(uv0);
+                    // allUVs.Add(uv1);
+                    // allUVs.Add(uv2);
+
+                    uint uv0c = CompressUV(uv0);
+                    uint uv1c = CompressUV(uv1);
+                    uint uv2c = CompressUV(uv2);
+                    Vector4 packedUvs = new(math.asfloat(uv0c), math.asfloat(uv1c), math.asfloat(uv2c), math.asfloat(0)); // .w unused
+                    allUVs.Add(packedUvs);
+
+                    var v0 = new Vector4(p0.x, p0.y, p0.z, math.asfloat((uint)primitiveID + primitiveIDOffset));
+                    var v1 = new Vector4(p1.x, p1.y, p1.z, math.asfloat(objectId));
+                    var v2 = new Vector4(p2.x, p2.y, p2.z, math.asfloat(0)); // unused
+                    bvhVertices.Add(v0);
+                    bvhVertices.Add(v1);
+                    bvhVertices.Add(v2);
                 }
 
                 objectId++;
@@ -381,6 +395,42 @@ namespace VRCTrace
 
             return renderers;
         }
+
+        public static uint CompressUV(Vector2 uv)
+        {
+            ushort x = (ushort)Mathf.RoundToInt(Mathf.Clamp01(uv.x) * 65535f);
+            ushort y = (ushort)Mathf.RoundToInt(Mathf.Clamp01(uv.y) * 65535f);
+
+            return (uint)x | ((uint)y << 16);
+        }
+
+        public static uint EncodeNormalOctahedral(Vector3 n)
+        {
+            float invL1 = 1f / (Mathf.Abs(n.x) + Mathf.Abs(n.y) + Mathf.Abs(n.z));
+            float ox = n.x * invL1;
+            float oy = n.y * invL1;
+
+            if (n.z < 0f)
+            {
+                float newX = (1f - Mathf.Abs(oy)) * Sign(ox);
+                float newY = (1f - Mathf.Abs(ox)) * Sign(oy);
+                ox = newX;
+                oy = newY;
+            }
+
+            ushort ex = EncodeChannel(ox);
+            ushort ey = EncodeChannel(oy);
+
+            return (uint)ex | ((uint)ey << 16);
+        }
+
+        static ushort EncodeChannel(float f)
+        {
+            return (ushort)Mathf.RoundToInt(Mathf.Clamp01((f + 1f) * 0.5f) * 65535f);
+        }
+
+        // copysign(1, v) — returns +1 or -1 matching the sign of v
+        static float Sign(float v) => v < 0f ? -1f : 1f;
 #endif
 
     }
@@ -412,6 +462,7 @@ namespace VRCTrace
         }
 
     }
+
 #endif
 }
 #endif

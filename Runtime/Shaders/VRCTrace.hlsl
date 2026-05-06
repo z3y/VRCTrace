@@ -85,13 +85,29 @@ float3 VRCTrace_SafeNormalize(float3 inVec)
     return inVec * rsqrt(dp3);
 }
 
+float3 VRCTraceDecodeOctahedralNormal(uint packed)
+{
+    float2 f = float2(uint2(packed & 0xFFFFu, packed >> 16)) * (2.0 / 65535.0) - 1.0;
+
+    float3 n = float3(f.x, f.y, 1.0 - abs(f.x) - abs(f.y));
+    float t = saturate(-n.z);
+    n.xy += n.xy >= 0.0 ? -t : t;
+    return normalize(n);
+}
+
+float2 VRCTraceDecodeUV(uint packed)
+{
+    return float2(uint2(packed & 0xFFFFu, packed >> 16)) * (1.0 / 65535.0);
+}
+
 float3 TriangleSmoothNormal(Intersection intersection, float3 Ng)
 {
     uint primitiveID = intersection.primitiveID;
 
-    float3 n0 = IndexTexture(_UdonVRCTraceNormals, primitiveID * 3 + 0).xyz;
-    float3 n1 = IndexTexture(_UdonVRCTraceNormals, primitiveID * 3 + 1).xyz;
-    float3 n2 = IndexTexture(_UdonVRCTraceNormals, primitiveID * 3 + 2).xyz;
+    uint4 data = asuint(IndexTexture(_UdonVRCTraceNormals, primitiveID));
+    float3 n0 = VRCTraceDecodeOctahedralNormal(data.x);
+    float3 n1 = VRCTraceDecodeOctahedralNormal(data.y);
+    float3 n2 = VRCTraceDecodeOctahedralNormal(data.z);
 
     float u = intersection.u;
     float v = intersection.v;
@@ -103,9 +119,11 @@ float3 TriangleSmoothNormal(Intersection intersection, float3 Ng)
 float2 TriangleUV(Intersection intersection)
 {
     uint primitiveID = intersection.primitiveID;
-    float2 n0 = IndexTexture(_UdonVRCTraceUVs, primitiveID * 3 + 0).xy;
-    float2 n1 = IndexTexture(_UdonVRCTraceUVs, primitiveID * 3 + 1).xy;
-    float2 n2 = IndexTexture(_UdonVRCTraceUVs, primitiveID * 3 + 2).xy;
+
+    uint4 data = asuint(IndexTexture(_UdonVRCTraceUVs, primitiveID));
+    float2 n0 = VRCTraceDecodeUV(data.x);
+    float2 n1 = VRCTraceDecodeUV(data.y);
+    float2 n2 = VRCTraceDecodeUV(data.z);
 
     float u = intersection.u;
     float v = intersection.v;
